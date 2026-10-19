@@ -13,7 +13,7 @@ import { decodeDataUrl, fetchMedia, getImageSize, resizeImage, sha256Hex } from 
 import { getWritableRoot, appendIndexMirror, writeItemFiles, writeText } from './fs-writer.js';
 import { downloadBytes, downloadText } from './downloads-writer.js';
 import { putThumb } from './thumb-store.js';
-import { enlargeUrl } from './url-rules.js';
+import { enlargeUrl, fallbackUrls } from './url-rules.js';
 
 export class TargetError extends Error {
   constructor(message) {
@@ -282,15 +282,33 @@ async function saveOne(item, meta, settings, target, knownHashes, knownLinks, co
     sourceUrl = linkUrl;
   } else {
     // v1.3：命中站点规则时先换原图（失败/无命中保持原 URL）
-    const enlarged = enlargeUrl(sourceUrl);
-    if (enlarged.hit && enlarged.url && enlarged.url !== sourceUrl) {
-      item.enlargedFrom = sourceUrl;
-      sourceUrl = enlarged.url;
+    let fetchUrl = sourceUrl;
+    const enlarged = enlargeUrl(fetchUrl);
+    if (enlarged.hit && enlarged.url && enlarged.url !== fetchUrl) {
+      item.enlargedFrom = fetchUrl;
+      fetchUrl = enlarged.url;
     }
-    const fetched = await fetchMedia(sourceUrl, {
-      pageUrl: item.pageUrl || '',
-      useReferrer: settings.useReferrer
-    });
+    const fetchOptions = { pageUrl: item.pageUrl || '', useReferrer: settings.useReferrer };
+    let fetched;
+    try {
+      fetched = await fetchMedia(fetchUrl, fetchOptions);
+    } catch (err) {
+      // 主 CDN 失败时尝试备用 CDN（例如小红书 sns-img-hw → sns-img-bd）
+      const backups = fallbackUrls(fetchUrl);
+      let lastError = err;
+      for (const backup of backups) {
+        try {
+          fetched = await fetchMedia(backup, fetchOptions);
+          item.enlargedFrom = fetchUrl;
+          fetchUrl = backup;
+          lastError = null;
+          break;
+        } catch (backupError) {
+          lastError = backupError;
+        }
+      }
+      if (!fetched) throw lastError;
+    }
     bytes = fetched.bytes;
     mime = mime || fetched.mime;
     if (!ext) ext = extFromMime(mime, sourceUrl);

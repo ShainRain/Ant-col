@@ -290,6 +290,12 @@ E2E 覆盖：
 
 ## 更新记录
 
+### v1.3.2
+
+- 修复：**小红书图片保存失败**。原规则重写到 `sns-img-al.xhscdn.com`，该域名现在直接 403；改为公开 CDN `sns-img-hw.xhscdn.com`，失败时自动切换 `sns-img-bd.xhscdn.com`。
+- 改进：部分站点会把图片/链接设为不可拖（`draggable="false"` / `-webkit-user-drag:none`），现在 `mousedown` 时会临时恢复可拖（与 Eagle 对 video/audio 的处理一致）。
+- 元数据仍保留页面上的原始图片 URL，方便回溯来源。
+
 ### v1.3.1
 
 - 修复：拖拽保存页面上，**在中间卡片之外的暗色遮罩区域松手不会保存**；现在整块遮罩都是有效放置区，默认存入默认项目（`Shift` 仍打开编辑面板）。

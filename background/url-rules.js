@@ -396,12 +396,14 @@ const RULES = [
   },
   {
     site: '小红书',
-    pattern: 'https?://sns-webpic-qc.xhscdn.com/(.*)',
+    pattern: 'https?://sns-webpic(?:-qc)?[.]xhscdn[.]com/(.*)',
+    // sns-webpic-qc 是带鉴权的 403 域名；sns-img-hw / sns-img-bd 是公开 CDN。
+    // 注意：sns-img-al 已失效（403），不要再用。
     replace: (url) =>
       url
         .replace(
-          /:\/\/[^/]+(\.xhscdn.com\/+)[0-9]+\/+[0-9a-f]{10,}\/+([^/.?#!]+)(?:[?#!].*)?/,
-          '://sns-img-al$1$2'
+          /:\/\/[^/]+(\.xhscdn\.com\/+)[0-9]+\/+[0-9a-f]{10,}\/+([^/.?#!]+)(?:[?#!].*)?/,
+          '://sns-img-hw$1$2'
         )
         .split('!')[0]
   },
@@ -572,4 +574,21 @@ export function enlargeUrl(url) {
     return { url: next, hit: true, site: rule.site };
   }
   return { url: input, hit: false, site: null };
+}
+
+/**
+ * 命中规则后的备用下载地址（例如小红书 sns-img-hw 失败时换 sns-img-bd）。
+ * 纯函数、不联网；调用方按顺序重试即可。
+ *
+ * @param {string} url 已放大后的 URL
+ * @returns {string[]} 备用 URL 列表（不含入参本身）
+ */
+export function fallbackUrls(url) {
+  const input = typeof url === 'string' ? url : url == null ? '' : String(url);
+  if (!/^https?:\/\//i.test(input)) return [];
+  const list = [];
+  if (/^https?:\/\/sns-img-hw\.xhscdn\.com\//i.test(input)) {
+    list.push(input.replace('://sns-img-hw.xhscdn.com/', '://sns-img-bd.xhscdn.com/'));
+  }
+  return list;
 }

@@ -486,3 +486,9 @@ export const URL_RULES = [
 - 根因：drop 监听只挂在 540×292 的卡片上，用户把素材拖到卡片外的暗色遮罩松手时 `event.target.closest('[data-drop]')` 为空，直接 `return`，既不保存也不提示。
 - 修复：整块遮罩接收 drop（默认项目，`Shift` 打开面板）；补「正在保存…」即时提示；toast 改为同步显示，避免 rAF 节流导致不可见；e2e 增加真实 `Input.dispatchDragEvent` 命中测试用例。
 
+**v1.3.2 修复（小红书保存失败）**
+
+- 根因：Eagle 原规则把 `sns-webpic-qc.xhscdn.com/...` 重写到 `sns-img-al.xhscdn.com`，该 CDN 现已 403；保存阶段拿不到图片字节，表现为「拖过去没反应」。
+- 修复：重写到 `sns-img-hw.xhscdn.com/<1040g…>`（实测 200、`Access-Control-Allow-Origin:*`），失败自动换 `sns-img-bd`；规则单测与「真实 403 URL → 落盘 394,946 B webp」端到端验证通过。
+- 兜底：站点设置 `draggable="false"` / `-webkit-user-drag:none` 时，`mousedown` 临时恢复可拖（对齐 Eagle 的 `#makeDraggable` 行为）。
+

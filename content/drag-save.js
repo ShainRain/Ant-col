@@ -220,6 +220,25 @@
 
   document.addEventListener('dragstart', onDragStart, true);
   document.addEventListener('dragend', onDragEnd, true);
+
+  // 有些站点（含小红书）会把图片/链接设成不可拖：mousedown 时临时恢复可拖。
+  // 与 Eagle 对 video/audio 的 #makeDraggable 行为一致。
+  function ensureDraggable(event) {
+    const el = event.target?.closest?.('img, a');
+    if (!el) return;
+    try {
+      if (el.getAttribute('draggable') === 'false' || el.draggable === false) {
+        el.dataset.antColDraggable = el.getAttribute('draggable') || 'false';
+        el.draggable = true;
+      }
+      const style = getComputedStyle(el);
+      if (style.webkitUserDrag === 'none' || style.getPropertyValue('-webkit-user-drag') === 'none') {
+        el.dataset.antColUserDrag = el.style.webkitUserDrag || '';
+        el.style.webkitUserDrag = 'element';
+      }
+    } catch { /* ignore */ }
+  }
+  document.addEventListener('mousedown', ensureDraggable, true);
   window.addEventListener('blur', () => { if (!panelHost && !chooserHost) hideDropPage(); });
 
   function folderIcon(size = 16) {

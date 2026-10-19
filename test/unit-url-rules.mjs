@@ -10,7 +10,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { URL_RULES, ENLARGE_RULE_COUNT, enlargeUrl } from '../background/url-rules.js';
+import { URL_RULES, ENLARGE_RULE_COUNT, enlargeUrl, fallbackUrls } from '../background/url-rules.js';
 
 let passed = 0;
 const failures = [];
@@ -329,7 +329,7 @@ const REWRITES = [
   {
     site: '小红书',
     input: 'https://sns-webpic-qc.xhscdn.com/202401/abc123def0/1040g0083123456789!nd_dft_wlteh_webp_3',
-    output: 'https://sns-img-al.xhscdn.com/1040g0083123456789'
+    output: 'https://sns-img-hw.xhscdn.com/1040g0083123456789'
   },
   {
     site: 'Medium',
@@ -501,6 +501,15 @@ test('不修改规则表本身', () => {
     URL_RULES.map((rule) => rule.site),
     sites
   );
+});
+
+test('小红书 CDN：sns-img-al 已失效，改用 sns-img-hw 且提供 bd 备用', () => {
+  const out = enlargeUrl('https://sns-webpic.xhscdn.com/202401/abc123def0/1040g0083123456789!nd_dft_wlteh_webp_3');
+  assert.equal(out.url, 'https://sns-img-hw.xhscdn.com/1040g0083123456789');
+  assert.deepEqual(fallbackUrls(out.url), ['https://sns-img-bd.xhscdn.com/1040g0083123456789']);
+  assert.deepEqual(fallbackUrls('https://example.com/x.jpg'), []);
+  // 已经是公开 CDN 的地址不再二次改写
+  assert.equal(enlargeUrl('https://sns-img-hw.xhscdn.com/1040g0083123456789').hit, false);
 });
 
 // ---------------------------------------------------------------------------
