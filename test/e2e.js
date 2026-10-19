@@ -240,7 +240,7 @@ async function main() {
     const left = host?.shadowRoot?.querySelector('.left');
     const dt = new DataTransfer();
     left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
-    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
     return true;
   })()`);
   await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
@@ -270,6 +270,73 @@ async function main() {
   await waitFor(async () => !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 6000);
   await sleep(400);
 
+  // v1.3: star rating -> sidecar/index, and panel keeps 5 stars
+  await evalIn(page, `(() => {
+    const img = document.querySelector('#tiny');
+    const dt = new DataTransfer();
+    img.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await sleep(300);
+  await evalIn(page, `(() => {
+    const host = document.getElementById('ant-col-drop-host');
+    const left = host?.shadowRoot?.querySelector('.left');
+    const dt = new DataTransfer();
+    left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
+    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
+  await sleep(200);
+  const starClick = await evalIn(page, `(() => {
+    const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
+    const title = root.querySelector('.title');
+    title.value = '星级测试图';
+    title.dispatchEvent(new Event('input', { bubbles: true }));
+    root.querySelectorAll('[data-star]')[4].click();
+    const onCount = root.querySelectorAll('[data-star].on').length;
+    root.querySelector('.save').click();
+    return { onCount };
+  })()`);
+  const starClosed = await waitFor(async () => !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 15000);
+  const starItem = await waitFor(async () => {
+    const res = await evalIn(popup, `chrome.runtime.sendMessage({ type: 'library-state' })`);
+    return (res?.items || []).find((item) => item.name === '星级测试图') || null;
+  }, 15000);
+  if (!starClosed) throw new Error('star panel did not close');
+  if (starClick.onCount !== 5) throw new Error(`star UI on-count ${starClick.onCount}, expected 5`);
+  if (!starItem || Number(starItem.star) !== 5) throw new Error(`star not persisted: ${JSON.stringify(starItem)}`);
+  log('star rating', JSON.stringify({ onCount: starClick.onCount, star: starItem.star }));
+
+  // v1.3: drop on a project = direct save (no panel); Shift keeps the editor
+  await evalIn(page, `(() => {
+    const img = document.querySelector('#hero');
+    const dt = new DataTransfer();
+    img.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await sleep(300);
+  await evalIn(page, `(() => {
+    const host = document.getElementById('ant-col-drop-host');
+    const root = host.shadowRoot;
+    const target = [...root.querySelectorAll('.folder-item')].find((item) => item.querySelector('.name')?.textContent === '日常审美');
+    if (!target) throw new Error('project row not found');
+    const dt = new DataTransfer();
+    target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await sleep(1200);
+  const directPanelAbsent = !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false));
+  const directItem = await waitFor(async () => {
+    const res = await evalIn(popup, `chrome.runtime.sendMessage({ type: 'library-state' })`);
+    return (res?.items || []).find((item) => item.collection === '日常审美'
+      && item.kind === 'image' && String(item.sourceUrl || '').includes('art-1.jpg')) || null;
+  }, 15000);
+  if (!directPanelAbsent) throw new Error('direct save unexpectedly opened the panel');
+  if (!directItem) throw new Error('direct save did not create an index item');
+  log('direct save', JSON.stringify({ panelAbsent: directPanelAbsent, id: directItem.id, collection: directItem.collection }));
+
   // image inside <a> -> panel offers image / link card mode
   await evalIn(page, `(() => {
     const img = document.querySelector('#portrait');
@@ -283,7 +350,7 @@ async function main() {
     const left = host?.shadowRoot?.querySelector('.left');
     const dt = new DataTransfer();
     left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
-    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
     return true;
   })()`);
   await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
@@ -326,7 +393,7 @@ async function main() {
     if (!item) return { found: false };
     const dt = new DataTransfer();
     item.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
-    item.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    item.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
     return { found: true };
   })()`);
   await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
@@ -367,7 +434,7 @@ async function main() {
     const choose = root?.querySelector('.choose');
     const dt = new DataTransfer();
     choose.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
-    choose.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    choose.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
     return true;
   })()`);
   await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-folder-chooser-host')`, false).catch(() => false), 4000);
@@ -699,7 +766,7 @@ async function main() {
       if (!target) throw new Error('drop target not found');
       const dt = new DataTransfer();
       target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
-      target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+      target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, shiftKey: true, dataTransfer: dt }));
       return true;
     })()`);
     const opened = await waitFor(async () => evalIn(regPage, `!!document.getElementById('ant-col-drag-panel-host')`), 5000);

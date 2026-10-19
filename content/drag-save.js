@@ -57,14 +57,17 @@
   const isHttpLink = (href) => !!href && /^(https?:|file:)/i.test(href);
 
   function imageItem(img, anchor) {
-    const src = img?.currentSrc || img?.src;
+    const api = window.AntColExtract;
+    const best = api?.bestImageSource ? api.bestImageSource(img) : null;
+    const src = best?.src || img?.currentSrc || img?.src;
     if (!src) return null;
     const link = isHttpLink(anchor?.href) ? abs(anchor.href) : '';
     return {
       kind: 'image',
       url: abs(src),
       previewUrl: abs(src),
-      title: img.alt || img.title || (anchor?.textContent || '').trim() || '',
+      title: (api?.bestTitleFromElement ? api.bestTitleFromElement(img, document.title) : '')
+        || img.alt || img.title || (anchor?.textContent || '').trim() || '',
       alt: img.alt || '',
       width: img.naturalWidth || 0,
       height: img.naturalHeight || 0,
@@ -77,6 +80,7 @@
 
   function backgroundUrlOf(node) {
     try {
+      if (window.AntColExtract?.backgroundImageUrl) return window.AntColExtract.backgroundImageUrl(node);
       const bg = getComputedStyle(node).backgroundImage || '';
       const m = /url\((['"]?)([^'")]+)\1\)/i.exec(bg);
       const url = (m && m[2] ? m[2] : '').trim();
@@ -374,7 +378,11 @@
       }
       const name = target.dataset.collection || DEFAULT_NAME();
       hideDropPage();
-      openPanel(item, name);
+      if (event.shiftKey) {
+        openPanel(item, name);
+      } else {
+        directSave(item, name);
+      }
     });
   }
 
@@ -427,6 +435,50 @@
     hideDropTimer = setTimeout(() => {
       if (!panelHost && !chooserHost && dropHost) dropHost.style.display = 'none';
     }, 170);
+  }
+
+  function toast(text, tone = 'success') {
+    try { window.__antColToast?.(text, tone); } catch { /* ignore */ }
+  }
+
+  // 拖到项目行/左侧区域：默认「放下即入库」，按住 Shift 才打开编辑面板。
+  async function directSave(item, collectionName) {
+    const mode = item.kind === 'link' ? 'link' : 'image';
+    let saveUrl = mode === 'link' ? item.linkUrl : item.url;
+    if (mode !== 'link' && /^blob:/i.test(String(saveUrl || ''))) {
+      const inline = await blobToDataUrl(saveUrl);
+      if (inline) saveUrl = inline;
+    }
+    const payload = {
+      kind: mode === 'link' ? 'link' : item.kind,
+      url: saveUrl,
+      linkUrl: item.linkUrl || '',
+      title: item.title || item.alt || item.pageTitle || '未命名素材',
+      alt: item.alt || '',
+      width: item.width || 0,
+      height: item.height || 0,
+      pageUrl: item.pageUrl || location.href,
+      pageTitle: item.pageTitle || document.title
+    };
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'save',
+        items: [payload],
+        meta: { tags: [], note: '', collection: collectionName }
+      });
+      if (!response || response.error) throw new Error(response?.error || '保存失败');
+      const result = response.items?.[0];
+      if (!result) throw new Error('保存失败');
+      if (result.status === 'saved') {
+        toast(`已存入「${collectionName}」`, 'success');
+      } else if (result.status === 'duplicate') {
+        toast(`「${collectionName}」里已有相同内容`, 'info');
+      } else {
+        toast(result.error || '保存失败', 'error');
+      }
+    } catch (err) {
+      toast(err?.message || '保存失败', 'error');
+    }
   }
 
   // ---------- folder chooser ----------
@@ -611,6 +663,7 @@
       item,
       mode: item.kind === 'link' ? 'link' : 'image',
       tags: [],
+      star: 0,
       titleEdited: false,
       collection,
       busy: false
@@ -660,6 +713,14 @@
         }
         .field { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
         .field > span { font-size: 9.5px; letter-spacing: .1em; color: #a4aaad; text-transform: uppercase; }
+        .rating { display: flex; align-items: center; gap: 2px; margin: -2px 0 2px; }
+        .rating button {
+          border: 0; background: transparent; color: #3a3f42; font-size: 17px; line-height: 1;
+          padding: 0 1px; cursor: pointer; transition: color .12s, transform .12s;
+        }
+        .rating button:hover { transform: translateY(-1px); }
+        .rating button.on { color: #f7f9f9; }
+        .rating .hint { margin-left: 7px; font-size: 9.5px; color: #727a7e; letter-spacing: .02em; }
         input.title, textarea.note {
           width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.14); background: #111315; color: #f7f9f9;
           border-radius: 5px; padding: 8px 10px; font: inherit; outline: none;
@@ -717,6 +778,14 @@
           <div class="linkbadge" hidden>链接卡片</div>
           <div class="dims" hidden></div>
         </div>
+        <div class="rating" role="radiogroup" aria-label="评分">
+          <button data-star="1" title="1 星">★</button>
+          <button data-star="2" title="2 星">★</button>
+          <button data-star="3" title="3 星">★</button>
+          <button data-star="4" title="4 星">★</button>
+          <button data-star="5" title="5 星">★</button>
+          <span class="hint">点击评分 · 再点同一颗清除</span>
+        </div>
         <label class="field"><span>名称</span><input class="title" maxlength="120" /></label>
         <div class="modes" hidden>
           <button data-mode="image">保存图片</button>
@@ -752,6 +821,13 @@
     const collectionEl = q('.collection');
     const status = q('.status');
     const saveBtn = q('.save');
+    const starButtons = [...panelShadow.querySelectorAll('[data-star]')];
+
+    const renderStars = () => {
+      for (const button of starButtons) {
+        button.classList.toggle('on', Number(button.dataset.star) <= panelState.star);
+      }
+    };
 
     const setStatus = (text, ok = false) => {
       status.textContent = text || '';
@@ -845,6 +921,13 @@
       });
     });
     panelShadow.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
+    for (const button of starButtons) {
+      button.addEventListener('click', () => {
+        const value = Number(button.dataset.star) || 0;
+        panelState.star = panelState.star === value ? 0 : value;
+        renderStars();
+      });
+    }
 
     title.addEventListener('input', () => { panelState.titleEdited = true; });
     tagIn.addEventListener('keydown', (event) => {
@@ -898,7 +981,7 @@
         const response = await chrome.runtime.sendMessage({
           type: 'save',
           items: [payload],
-          meta: { tags: state.tags.slice(), note: note.value.trim(), collection: state.collection }
+          meta: { tags: state.tags.slice(), note: note.value.trim(), collection: state.collection, star: state.star }
         });
         if (!response || response.error) throw new Error(response?.error || '保存失败');
         const result = response.items?.[0];
@@ -934,6 +1017,7 @@
     if (!modes.hidden) setMode('image');
     else setMode(panelState.item.kind === 'link' ? 'link' : 'image');
     renderTags();
+    renderStars();
     updateDest();
     setPreview();
     setStatus('');

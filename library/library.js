@@ -88,14 +88,18 @@ async function load() {
 }
 
 function parseQuery(raw) {
-  const out = { text: [], tag: '', project: '', site: '', kind: '', status: '' };
+  const out = { text: [], tag: '', project: '', site: '', kind: '', status: '', star: 0, starOp: '', starred: false };
   for (const token of String(raw || '').trim().split(/\s+/).filter(Boolean)) {
     if (token.startsWith('tag:') || token.startsWith('#')) out.tag = token.replace(/^tag:|^#/, '');
     else if (token.startsWith('project:')) out.project = token.slice(8);
     else if (token.startsWith('site:')) out.site = token.slice(5).toLowerCase();
     else if (token.startsWith('kind:')) out.kind = token.slice(5);
+    else if (token === 'is:starred' || token === 'is:star') out.starred = true;
     else if (token.startsWith('is:')) out.status = token.slice(3);
-    else out.text.push(token);
+    else if (token.startsWith('star:')) {
+      const match = /^(>=|<=|>|<|=)?([0-5])$/.exec(token.slice(5));
+      if (match) { out.starOp = match[1] || '='; out.star = Number(match[2]); }
+    } else out.text.push(token);
   }
   return out;
 }
@@ -114,6 +118,17 @@ function filtered() {
   if (q.tag) list = list.filter((i) => (i.tags || []).includes(q.tag));
   if (q.project) list = list.filter((i) => i.collection === q.project);
   if (q.status) list = list.filter((i) => i.status === q.status);
+  if (q.starred) list = list.filter((i) => Number(i.star || 0) > 0);
+  if (q.star) {
+    list = list.filter((i) => {
+      const star = Number(i.star || 0);
+      if (q.starOp === '>=') return star >= q.star;
+      if (q.starOp === '<=') return star <= q.star;
+      if (q.starOp === '>') return star > q.star;
+      if (q.starOp === '<') return star < q.star;
+      return star === q.star;
+    });
+  }
   const kind = q.kind || state.kind;
   if (kind !== 'all') list = list.filter((i) => i.kind === kind);
   if (q.site) list = list.filter((i) => String(i.site || '').toLowerCase().includes(q.site));
@@ -129,6 +144,9 @@ function filtered() {
   else if (state.sort === 'oldest') list.sort((a, b) => (a.savedAtMs || 0) - (b.savedAtMs || 0));
   else if (state.sort === 'name') list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'zh'));
   else if (state.sort === 'size') list.sort((a, b) => (b.size || 0) - (a.size || 0));
+  else if (state.sort === 'star') {
+    list.sort((a, b) => (Number(b.star || 0) - Number(a.star || 0)) || ((b.savedAtMs || 0) - (a.savedAtMs || 0)));
+  }
   return list;
 }
 
@@ -294,6 +312,15 @@ function makeCard(item) {
   name.textContent = item.name || '未命名素材';
   const meta = document.createElement('div');
   meta.className = 'card-meta';
+  const star = Number(item.star || 0);
+  if (star > 0) {
+    const starEl = document.createElement('span');
+    starEl.className = 'card-star';
+    starEl.style.cssText = 'color:#f7f9f9;letter-spacing:1px;';
+    starEl.textContent = '★'.repeat(star);
+    starEl.title = `${star} 星`;
+    meta.append(starEl);
+  }
   const site = document.createElement('span');
   site.textContent = item.collection || '未归类';
   const kind = document.createElement('span');
@@ -389,6 +416,7 @@ function openDetail(id) {
       <div class="field"><span>文件</span><div class="drawer-path" id="detailPath"></div></div>
       <div class="field"><span>项目</span><select id="detailProject"></select></div>
       <div class="field"><span>状态</span><div class="status-row" id="detailStatus"></div></div>
+      <div class="field"><span>评分</span><div class="status-row" id="detailStar"></div></div>
       <div class="field"><span>标签</span><div class="chips" id="detailTags"></div><input id="detailTagInput" placeholder="输入后回车" /></div>
       <div class="field"><span>备注</span><textarea id="detailNote" placeholder="为什么存它？"></textarea></div>
       <div class="drawer-actions">
@@ -422,6 +450,7 @@ function openDetail(id) {
   select.value = item.collection || '';
 
   let status = item.status;
+  let star = Math.max(0, Math.min(5, Number(item.star || 0)));
   let tags = [...(item.tags || [])];
   const renderStatus = () => {
     const box = $('#detailStatus');
@@ -448,7 +477,23 @@ function openDetail(id) {
       box.appendChild(chip);
     });
   };
+  const renderStar = () => {
+    const box = $('#detailStar');
+    box.innerHTML = '';
+    for (let value = 1; value <= 5; value++) {
+      const button = document.createElement('button');
+      button.textContent = value <= star ? '★' : '☆';
+      button.title = `${value} 星`;
+      button.className = value <= star ? 'on' : '';
+      button.addEventListener('click', () => {
+        star = star === value ? 0 : value;
+        renderStar();
+      });
+      box.appendChild(button);
+    }
+  };
   renderStatus();
+  renderStar();
   renderTags();
   $('#detailNote').value = item.annotation || '';
   $('#detailTagInput').addEventListener('keydown', (event) => {
@@ -501,6 +546,7 @@ function openDetail(id) {
     const ok = await updateItems([item.id], {
       collection: select.value,
       status,
+      star,
       tags,
       annotation: $('#detailNote').value
     }, '已保存修改');
@@ -689,7 +735,7 @@ function exportItems(format) {
   if (!items.length) return toast('没有可导出的素材', 'error');
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   if (format === 'csv') {
-    const header = ['id', 'name', 'kind', 'project', 'status', 'tags', 'sourceUrl', 'pageUrl', 'relativePath', 'width', 'height', 'size', 'savedAt'];
+    const header = ['id', 'name', 'kind', 'project', 'status', 'star', 'tags', 'sourceUrl', 'pageUrl', 'relativePath', 'width', 'height', 'size', 'savedAt'];
     const esc = (v) => {
       const s = String(v ?? '');
       return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -697,7 +743,7 @@ function exportItems(format) {
     const rows = [header.join(',')];
     for (const item of items) {
       rows.push([
-        item.id, item.name, item.kind, item.collection, item.status, (item.tags || []).join('|'),
+        item.id, item.name, item.kind, item.collection, item.status, Number(item.star || 0), (item.tags || []).join('|'),
         item.sourceUrl, item.pageUrl, item.relativePath, item.width, item.height, item.size, item.savedAt
       ].map(esc).join(','));
     }
@@ -711,6 +757,7 @@ function exportItems(format) {
       if (item.pageUrl && item.pageUrl !== item.sourceUrl) lines.push(`- 页面：${item.pageUrl}`);
       lines.push(`- 项目：${item.collection || '未归类'} · 状态：${STATUS_LABEL[item.status] || item.status}`);
       if (item.tags?.length) lines.push(`- 标签：${item.tags.join('、')}`);
+      if (Number(item.star) > 0) lines.push(`- 评分：${'★'.repeat(Number(item.star))}`);
       if (item.annotation) lines.push(`- 备注：${item.annotation}`);
       if (item.relativePath) lines.push(`- 文件：\`${item.relativePath}\``);
       lines.push('');
@@ -757,6 +804,12 @@ function bind() {
     const tag = prompt('给选中素材加一个标签');
     if (!tag?.trim()) return;
     await updateItems([...state.selected], { addTags: [tag.trim()] }, '标签已添加');
+  });
+  $('#batchStar').addEventListener('change', async (event) => {
+    const value = event.target.value;
+    event.target.value = '';
+    if (value === '') return;
+    await updateItems([...state.selected], { star: Number(value) }, value === '0' ? '评分已清除' : '评分已更新');
   });
   $('#batchKeepBtn').addEventListener('click', () => updateItems([...state.selected], { status: 'kept' }, '已标记为已整理'));
   $('#batchArchiveBtn').addEventListener('click', () => updateItems([...state.selected], { status: 'archived' }, '已归档'));

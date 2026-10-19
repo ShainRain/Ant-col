@@ -86,6 +86,21 @@
               <datalist id="tagSuggestions"></datalist>
             </div>
             <textarea id="noteInput" rows="1" placeholder="备注（可选）"></textarea>
+            <div class="meta-row" style="display:flex;gap:8px;align-items:center;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:.8;">项目
+                <select id="projectSelect" style="max-width:150px;"></select>
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;opacity:.8;">评分
+                <select id="starSelect">
+                  <option value="0">无</option>
+                  <option value="1">★ 1</option>
+                  <option value="2">★ 2</option>
+                  <option value="3">★ 3</option>
+                  <option value="4">★ 4</option>
+                  <option value="5">★ 5</option>
+                </select>
+              </label>
+            </div>
           </div>
           <div class="save-row">
             <label class="select-all"><input type="checkbox" id="selectAll" /> <span>全选</span></label>

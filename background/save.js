@@ -13,6 +13,7 @@ import { decodeDataUrl, fetchMedia, getImageSize, resizeImage, sha256Hex } from 
 import { getWritableRoot, appendIndexMirror, writeItemFiles, writeText } from './fs-writer.js';
 import { downloadBytes, downloadText } from './downloads-writer.js';
 import { putThumb } from './thumb-store.js';
+import { enlargeUrl } from './url-rules.js';
 
 export class TargetError extends Error {
   constructor(message) {
@@ -69,6 +70,12 @@ function collectTags(settings, item, extraTags = [], collection = null) {
   return [...tags];
 }
 
+function clampStar(value) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(5, n));
+}
+
 function buildRecord({ item, bytes, mime, ext, width, height, sha, settings, meta, relPath, id, collection }) {
   const now = new Date();
   const t = timestampParts(now);
@@ -103,6 +110,7 @@ function buildRecord({ item, bytes, mime, ext, width, height, sha, settings, met
     collectionPath: collection?.path || '',
     tags,
     annotation,
+    star: clampStar(meta.star ?? item.star ?? 0),
     status: meta.status || 'inbox',
     reviewedAt: null,
     savedAt: now.toISOString(),
@@ -138,6 +146,7 @@ export function sidecarFor(record) {
     collectionPath: record.collectionPath,
     tags: record.tags,
     annotation: record.annotation,
+    star: record.star || 0,
     status: record.status,
     reviewedAt: record.reviewedAt,
     savedAt: record.savedAt,
@@ -272,6 +281,12 @@ async function saveOne(item, meta, settings, target, knownHashes, knownLinks, co
     ext = 'html';
     sourceUrl = linkUrl;
   } else {
+    // v1.3：命中站点规则时先换原图（失败/无命中保持原 URL）
+    const enlarged = enlargeUrl(sourceUrl);
+    if (enlarged.hit && enlarged.url && enlarged.url !== sourceUrl) {
+      item.enlargedFrom = sourceUrl;
+      sourceUrl = enlarged.url;
+    }
     const fetched = await fetchMedia(sourceUrl, {
       pageUrl: item.pageUrl || '',
       useReferrer: settings.useReferrer

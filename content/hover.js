@@ -22,16 +22,19 @@
   }
 
   function fromImage(img) {
-    const src = img.currentSrc || img.src;
+    const api = window.AntColExtract;
+    const best = api?.bestImageSource ? api.bestImageSource(img) : null;
+    const src = best?.src || img.currentSrc || img.src;
     if (!src || src.startsWith('blob:')) return null;
     if (img.naturalWidth && img.naturalWidth < MIN_SIZE && img.naturalHeight && img.naturalHeight < MIN_SIZE) return null;
     return {
       url: absolute(src),
       kind: 'image',
-      title: img.title || img.alt || '',
+      title: (api?.bestTitleFromElement ? api.bestTitleFromElement(img, document.title) : '') || img.title || img.alt || '',
       alt: img.alt || '',
       width: img.naturalWidth || 0,
       height: img.naturalHeight || 0,
+      thumbnailURL: best?.thumbnailURL || '',
       pageUrl: location.href,
       pageTitle: document.title
     };
@@ -94,12 +97,14 @@
     if (canvas) return fromCanvas(canvas);
     let node = element;
     for (let depth = 0; node && depth < 5; depth++, node = node.parentElement) {
-      const bg = parseBackground(getComputedStyle(node).backgroundImage);
+      const bg = window.AntColExtract?.backgroundImageUrl
+        ? window.AntColExtract.backgroundImageUrl(node)
+        : parseBackground(getComputedStyle(node).backgroundImage);
       if (bg && !bg.startsWith('data:image/svg')) {
         return {
           url: bg,
           kind: 'image',
-          title: node.title || '',
+          title: window.AntColExtract?.bestTitleFromElement?.(node, document.title) || node.title || '',
           alt: '',
           width: 0,
           height: 0,
@@ -200,6 +205,9 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
   }
+
+  // 供同一隔离世界的其他内容脚本（拖拽直存等）复用
+  window.__antColToast = showToast;
 
   // ---------- element capture ----------
 

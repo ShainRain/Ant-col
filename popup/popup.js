@@ -65,6 +65,22 @@ async function loadState() {
   renderFirstRun();
   renderRecent();
   renderTagSuggestions();
+  renderMetaChoices();
+}
+
+function renderMetaChoices() {
+  const select = $('#projectSelect');
+  const current = select.value;
+  const collections = (state.settings?.collections || []).filter(Boolean);
+  select.innerHTML = '';
+  for (const name of collections) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+  const preferred = current || state.settings?.defaultCollection || collections[0] || '';
+  if (preferred && collections.includes(preferred)) select.value = preferred;
 }
 
 function renderTarget() {
@@ -389,7 +405,12 @@ async function saveSelected() {
       pageUrl: state.tab?.url || '',
       pageTitle: state.tab?.title || ''
     }));
-  const meta = { tags: state.tags.slice(), note: $('#noteInput').value.trim() };
+  const meta = {
+    tags: state.tags.slice(),
+    note: $('#noteInput').value.trim(),
+    collection: $('#projectSelect').value || '',
+    star: Number($('#starSelect').value || 0)
+  };
   const progress = $('#progress');
   const bar = $('#progressBar');
   progress.hidden = false;

@@ -104,6 +104,7 @@ async function renderFolder() {
 
 async function save(patch, message = '已保存') {
   settings = await setSettings(patch);
+  chrome.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
   if (message) toast(message);
 }
 

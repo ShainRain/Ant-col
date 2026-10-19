@@ -17,6 +17,12 @@ import { clearThumbs } from './thumb-store.js';
 import { showDefaultFolder, showDownload } from './downloads-writer.js';
 
 const MENU_ROOT = 'ant-col-root';
+const MENU_PROJECT_LIMIT = 10;
+const PROJECT_MENU_RE = /^save-(image|video|link|page)-to:(.+)$/;
+
+function projectMenuId(kind, name) {
+  return `save-${kind}-to:${encodeURIComponent(name)}`;
+}
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   await ensureDefaults();
@@ -42,10 +48,35 @@ async function ensureDefaults() {
 
 async function createMenus() {
   try { await chrome.contextMenus.removeAll(); } catch { /* ignore */ }
+  const settings = await getSettings();
+  const collections = [...new Set((settings.collections || [])
+    .map((name) => String(name || '').trim())
+    .filter(Boolean))].slice(0, MENU_PROJECT_LIMIT);
+
   chrome.contextMenus.create({ id: MENU_ROOT, title: 'Ant-col 蚁穴', contexts: ['all'] });
   chrome.contextMenus.create({ id: 'save-image', parentId: MENU_ROOT, title: '保存这张图片到素材库', contexts: ['image'] });
   chrome.contextMenus.create({ id: 'save-video', parentId: MENU_ROOT, title: '保存这个视频到素材库', contexts: ['video'] });
   chrome.contextMenus.create({ id: 'save-link', parentId: MENU_ROOT, title: '保存链接卡片', contexts: ['link'] });
+  if (collections.length) {
+    const groups = [
+      ['image', '保存图片到项目', 'image'],
+      ['video', '保存视频到项目', 'video'],
+      ['link', '保存链接到项目', 'link'],
+      ['page', '把本页存为链接卡片到项目', 'page']
+    ];
+    for (const [kind, title, context] of groups) {
+      const parentId = `save-${kind}-project`;
+      chrome.contextMenus.create({ id: parentId, parentId: MENU_ROOT, title, contexts: [context] });
+      for (const name of collections) {
+        chrome.contextMenus.create({
+          id: projectMenuId(kind, name),
+          parentId,
+          title: name.length > 24 ? `${name.slice(0, 24)}…` : name,
+          contexts: [context]
+        });
+      }
+    }
+  }
   chrome.contextMenus.create({ id: 'sep-1', parentId: MENU_ROOT, type: 'separator', contexts: ['page'] });
   chrome.contextMenus.create({ id: 'batch-save', parentId: MENU_ROOT, title: '批量保存本页图片…', contexts: ['page'] });
   chrome.contextMenus.create({ id: 'save-page-link', parentId: MENU_ROOT, title: '把本页保存为链接卡片', contexts: ['page'] });
@@ -59,6 +90,23 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const pageUrl = info.pageUrl || tab?.url || '';
   const pageTitle = tab?.title || '';
   try {
+    const projectMatch = PROJECT_MENU_RE.exec(String(info.menuItemId || ''));
+    if (projectMatch) {
+      const kind = projectMatch[1];
+      const collection = decodeURIComponent(projectMatch[2] || '').trim();
+      const base = { pageUrl, pageTitle, title: '', alt: '' };
+      let item;
+      if (kind === 'image' || kind === 'video') {
+        item = { ...base, kind, url: info.srcUrl };
+      } else if (kind === 'link') {
+        item = { ...base, kind: 'link', url: info.linkUrl, linkUrl: info.linkUrl, title: info.selectionText || '' };
+      } else {
+        item = { ...base, kind: 'link', url: pageUrl, linkUrl: pageUrl, title: pageTitle };
+      }
+      const result = await saveItems([item], { tags: [], note: '', collection });
+      await afterSave(result, tab);
+      return;
+    }
     if (info.menuItemId === 'save-image' || info.menuItemId === 'save-video') {
       const kind = info.menuItemId === 'save-image' ? 'image' : 'video';
       const result = await saveItems([{
@@ -340,6 +388,10 @@ async function updateItems(message) {
     patch.collection = message.collection.trim().slice(0, 48);
   }
   if (typeof message.annotation === 'string') patch.annotation = message.annotation.slice(0, 2000);
+  if (message.star !== undefined && message.star !== null && message.star !== '') {
+    const star = Math.round(Number(message.star));
+    if (Number.isFinite(star)) patch.star = Math.max(0, Math.min(5, star));
+  }
   if (Array.isArray(message.tags)) {
     patch.tags = [...new Set(message.tags.map((t) => String(t).trim().slice(0, 48)).filter(Boolean))].slice(0, 24);
   }
@@ -384,11 +436,11 @@ function csvEscape(value) {
 async function exportIndex(format = 'json') {
   const index = await getIndex();
   if (format === 'csv') {
-    const header = ['id', 'name', 'kind', 'ext', 'width', 'height', 'size', 'site', 'tags', 'pageUrl', 'sourceUrl', 'savedAt', 'relativePath', 'mode'];
+    const header = ['id', 'name', 'kind', 'ext', 'width', 'height', 'size', 'star', 'site', 'tags', 'pageUrl', 'sourceUrl', 'savedAt', 'relativePath', 'mode'];
     const lines = [header.join(',')];
     for (const item of index) {
       lines.push([
-        item.id, item.name, item.kind, item.ext, item.width, item.height, item.size,
+        item.id, item.name, item.kind, item.ext, item.width, item.height, item.size, item.star || 0,
         item.site, (item.tags || []).join('|'), item.pageUrl, item.sourceUrl, item.savedAt,
         item.relativePath, item.mode
       ].map(csvEscape).join(','));
@@ -433,8 +485,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const current = await getSettings();
           const list = [...new Set([...(current.collections || ['灵感收集']), name])].slice(0, 24);
           await setSettings({ collections: list });
+          await createMenus();
           return sendResponse({ ok: true, collections: list });
         }
+        case 'settings-changed':
+          await createMenus();
+          await refreshBadge();
+          return sendResponse({ ok: true });
         case 'library-state':
           return sendResponse(await buildLibraryState());
         case 'update-items':
