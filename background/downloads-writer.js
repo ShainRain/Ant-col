@@ -47,7 +47,7 @@ function waitForDownload(downloadId) {
   });
 }
 
-export async function downloadBytes(bytes, mime, relPath, { subfolder = '拾图素材' } = {}) {
+export async function downloadBytes(bytes, mime, relPath, { subfolder = 'Ant-col素材' } = {}) {
   const filename = normalizeDownloadPath(`${subfolder}/${relPath}`);
   let url;
   let revoke = false;

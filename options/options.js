@@ -72,7 +72,7 @@ async function renderFolder() {
 
   if (!root) {
     name.textContent = '尚未选择文件夹';
-    status.textContent = `默认：下载文件夹 / ${settings.downloadsSubfolder || '拾图素材'}`;
+    status.textContent = `默认：下载文件夹 / ${settings.downloadsSubfolder || 'Ant-col素材'}`;
     choose.textContent = '选择文件夹…';
     reauth.hidden = true;
     clear.hidden = true;
@@ -184,7 +184,7 @@ async function downloadExport(format) {
     try {
       await chrome.downloads.download({
         url,
-        filename: `拾图索引-${stamp}.${format === 'csv' ? 'csv' : 'json'}`,
+        filename: `Ant-col索引-${stamp}.${format === 'csv' ? 'csv' : 'json'}`,
         saveAs: true
       });
       toast(`已导出 ${res.count} 条索引`);
@@ -205,7 +205,7 @@ function bind() {
       }
     });
   }
-  $('#downloadsSubfolder').addEventListener('input', (e) => debounceSave({ downloadsSubfolder: e.target.value.trim() || '拾图素材' }));
+  $('#downloadsSubfolder').addEventListener('input', (e) => debounceSave({ downloadsSubfolder: e.target.value.trim() || 'Ant-col素材' }));
   $('#filenameTemplate').addEventListener('input', (e) => debounceSave({ filenameTemplate: e.target.value.trim() || '{date}_{time}_{site}_{name}' }));
   $('#collectionsInput').addEventListener('input', (e) => debounceSave(parseCollections(e.target.value)));
   $('#minImageSize').addEventListener('change', (e) => save({ minImageSize: Number(e.target.value) || 0 }, ''));

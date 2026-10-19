@@ -1,30 +1,16 @@
 :root {
-  --paper: #f7f2e9;
-  --paper-2: #fffaf1;
-  --ink: #19181c;
-  --muted: #8b8378;
-  --line: rgba(25, 24, 28, 0.1);
-  --card: rgba(255, 255, 255, 0.72);
-  --coral: #f4512c;
-  --coral-soft: rgba(244, 81, 44, 0.12);
-  --green: #1f9d6a;
-  --shadow: 0 18px 50px rgba(60, 40, 20, 0.13);
-  --radius: 16px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #17161a;
-    --paper-2: #1e1d22;
-    --ink: #f3eee6;
-    --muted: #9a938a;
-    --line: rgba(255, 255, 255, 0.1);
-    --card: rgba(255, 255, 255, 0.055);
-    --coral: #ff6542;
-    --coral-soft: rgba(255, 101, 66, 0.16);
-    --green: #55c99a;
-    --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  }
+  color-scheme: dark;
+  --paper: #08090a;
+  --paper-2: #111315;
+  --ink: #f7f9f9;
+  --muted: #a4aaad;
+  --line: rgba(255, 255, 255, 0.14);
+  --card: #111315;
+  --coral: #f7f9f9;
+  --coral-soft: rgba(255,255,255, 0.14);
+  --green: #f7f9f9;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --radius: 6px;
 }
 
 * { box-sizing: border-box; }
@@ -40,9 +26,7 @@ html, body {
 body {
   font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
   color: var(--ink);
-  background:
-    radial-gradient(1100px 300px at 85% -10%, var(--coral-soft), transparent 60%),
-    linear-gradient(160deg, var(--paper-2), var(--paper));
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -75,10 +59,7 @@ button { cursor: pointer; }
   min-width: 0;
 }
 
-.brand img {
-  border-radius: 9px;
-  box-shadow: 0 4px 14px rgba(244, 81, 44, 0.25);
-}
+.brand img { border-radius: 6px; }
 
 .brand-text {
   display: flex;
@@ -114,7 +95,7 @@ button { cursor: pointer; }
   transition: border-color 0.15s, color 0.15s;
 }
 
-.target-chip:hover { color: var(--ink); border-color: rgba(244, 81, 44, 0.4); }
+.target-chip:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.34); }
 
 .target-dot {
   width: 7px;
@@ -124,7 +105,7 @@ button { cursor: pointer; }
   flex: 0 0 auto;
 }
 
-.target-dot.warn { background: #e0a100; }
+.target-dot.warn { background: #a4aaad; }
 .target-dot.off { background: var(--muted); }
 
 .target-name {
@@ -145,7 +126,7 @@ button { cursor: pointer; }
   transition: all 0.15s;
 }
 
-.icon-btn:hover { color: var(--ink); border-color: rgba(244, 81, 44, 0.45); }
+.icon-btn:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.34); }
 .icon-btn.small { width: 26px; height: 26px; border-radius: 8px; }
 
 /* tabs */
@@ -243,15 +224,15 @@ select {
 .card {
   position: relative;
   aspect-ratio: 1 / 1;
-  border-radius: 11px;
+  border-radius: 5px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(244, 81, 44, 0.08), rgba(120, 90, 240, 0.08));
+  background: #111315;
   border: 1px solid var(--line);
   cursor: pointer;
   transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s;
 }
 
-.card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30, 20, 10, 0.12); }
+.card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.36); }
 
 .card img {
   width: 100%;
@@ -262,14 +243,14 @@ select {
 
 .card.selected {
   border-color: var(--coral);
-  box-shadow: 0 0 0 2px var(--coral), 0 8px 20px rgba(244, 81, 44, 0.22);
+  box-shadow: 0 0 0 1px var(--coral);
 }
 
 .card.selected::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(244, 81, 44, 0.2), transparent 55%);
+  background: rgba(255,255,255, 0.1);
   pointer-events: none;
 }
 
@@ -281,7 +262,7 @@ select {
   height: 17px;
   border-radius: 50%;
   border: 1.5px solid rgba(255, 255, 255, 0.9);
-  background: rgba(20, 18, 20, 0.32);
+  background: rgba(8,9,10, 0.32);
   backdrop-filter: blur(4px);
   display: grid;
   place-items: center;
@@ -292,9 +273,9 @@ select {
 }
 
 .card.selected .check {
-  background: var(--coral);
-  border-color: var(--coral);
-  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .size-badge {
@@ -303,7 +284,7 @@ select {
   bottom: 5px;
   font-size: 9px;
   color: rgba(255, 255, 255, 0.95);
-  background: rgba(20, 18, 20, 0.55);
+  background: rgba(8,9,10, 0.55);
   backdrop-filter: blur(4px);
   padding: 2px 4px;
   border-radius: 5px;
@@ -366,7 +347,7 @@ select {
   margin: 4px 0 8px;
   padding: 10px 11px;
   border-radius: 12px;
-  border: 1px dashed rgba(244, 81, 44, 0.4);
+  border: 1px dashed rgba(255,255,255, 0.4);
   background: var(--coral-soft);
 }
 
@@ -458,7 +439,7 @@ select {
   line-height: 1.45;
 }
 
-#noteInput:focus, .tag-box:focus-within { border-color: rgba(244, 81, 44, 0.55); }
+#noteInput:focus, .tag-box:focus-within { border-color: rgba(255,255,255, 0.55); }
 
 .save-row {
   display: flex;
@@ -489,8 +470,8 @@ select {
   font-size: 12px;
   font-weight: 650;
   color: #fff;
-  background: linear-gradient(135deg, #ff6b45, var(--coral));
-  box-shadow: 0 8px 20px rgba(244, 81, 44, 0.28);
+  background: var(--coral);
+  box-shadow: none;
   transition: transform 0.12s, opacity 0.12s;
 }
 
@@ -508,7 +489,7 @@ select {
 .progress-bar {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #ff8a5c, var(--coral));
+  background: linear-gradient(90deg, #ffffff, var(--coral));
   transition: width 0.2s;
 }
 
@@ -538,7 +519,7 @@ select {
   padding: 5px 7px;
 }
 
-.ghost-btn:hover { color: var(--ink); border-color: rgba(244, 81, 44, 0.4); }
+.ghost-btn:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.34); }
 
 .recent-list {
   flex: 1;
@@ -609,8 +590,8 @@ select {
   max-width: 330px;
   padding: 8px 12px;
   border-radius: 9px;
-  background: rgba(24, 24, 28, 0.94);
-  color: #faf7f2;
+  background: rgba(8,9,10, 0.94);
+  color: #f7f9f9;
   font-size: 11px;
   line-height: 1.45;
   opacity: 0;
@@ -621,7 +602,9 @@ select {
 }
 
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-.toast.error { background: rgba(150, 32, 32, 0.96); }
+.toast.error { background: rgba(40,40,40, 0.96); }
 
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb { background: rgba(120, 110, 100, 0.25); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255, 0.25); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

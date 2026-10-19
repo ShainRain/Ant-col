@@ -644,8 +644,8 @@ async function main() {
   log('library triage keep', JSON.stringify(triageAction));
   await evalIn(libraryPage, `document.querySelector('#triageClose')?.click()`).catch(() => {});
   await evalIn(libraryPage, `window.__shituLibrary.exportItems('md')`).catch(() => {});
-  await waitFor(() => walk(downloads).some((f) => f.path.includes('拾图-导出')), 10000);
-  log('library export', JSON.stringify(walk(downloads).filter((f) => f.path.includes('拾图-导出')), null, 2));
+  await waitFor(() => walk(downloads).some((f) => f.path.includes('Ant-col-导出')), 10000);
+  log('library export', JSON.stringify(walk(downloads).filter((f) => f.path.includes('Ant-col-导出')), null, 2));
 
   // options page screenshot
   await evalIn(popup, `chrome.tabs.update(${popupTab.id}, { active: true })`).catch(() => {});

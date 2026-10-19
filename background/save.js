@@ -206,27 +206,27 @@ function linkCardHtml({ title, linkUrl, pageTitle, note }) {
   :root { color-scheme: light dark; }
   body { margin:0; min-height:100vh; display:grid; place-items:center;
     font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
-    background: radial-gradient(900px 400px at 80% -10%, #ff5a3c22, transparent 60%), #f7f2e9; color:#19181c; }
-  main { width:min(620px, calc(100% - 48px)); background:#fffaf1; border:1px solid #19181c18;
-    border-radius:22px; padding:34px 36px; box-shadow:0 24px 70px #3c281e18; }
-  .eyebrow { margin:0 0 10px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#f4512c; }
+    background:#ffffff; color:#08090a; }
+  main { width:min(620px, calc(100% - 48px)); background:#ffffff; border:1px solid #08090a1f;
+    border-radius:8px; padding:34px 36px; }
+  .eyebrow { margin:0 0 10px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#08090a; }
   h1 { margin:0 0 12px; font-size:24px; line-height:1.25; letter-spacing:-.02em; }
-  .url { margin:0 0 18px; font-size:12px; color:#857d72; word-break:break-all; }
+  .url { margin:0 0 18px; font-size:12px; color:#a4aaad; word-break:break-all; }
   .note { margin:0 0 18px; font-size:14px; line-height:1.65; white-space:pre-wrap; }
-  .meta { margin:0 0 22px; font-size:11px; color:#857d72; }
-  a { display:inline-flex; padding:10px 16px; border-radius:10px; background:#19181c; color:#fffaf1;
+  .meta { margin:0 0 22px; font-size:11px; color:#a4aaad; }
+  a { display:inline-flex; padding:10px 16px; border-radius:10px; background:#08090a; color:#ffffff;
     text-decoration:none; font-size:13px; font-weight:600; }
   @media (prefers-color-scheme: dark) {
-    body { background: radial-gradient(900px 400px at 80% -10%, #ff5a3c22, transparent 60%), #161519; color:#f3eee6; }
-    main { background:#1e1d22; border-color:#ffffff18; box-shadow:0 24px 70px #0008; }
-    .url, .meta { color:#9a938a; }
-    a { background:#f3eee6; color:#161519; }
+    body { background:#08090a; color:#f7f9f9; }
+    main { background:#111315; border-color:#ffffff24; }
+    .url, .meta { color:#a4aaad; }
+    a { background:#08090a; color:#ffffff; }
   }
 </style>
 </head>
 <body>
 <main>
-  <p class="eyebrow">拾图 · 链接收藏</p>
+  <p class="eyebrow">Ant-col 蚁穴 · 链接收藏</p>
   <h1>${escapeHtml(title)}</h1>
   <p class="url">${shownUrl}</p>
   ${note ? `<p class="note">${escapeHtml(note)}</p>` : ''}

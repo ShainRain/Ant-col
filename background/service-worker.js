@@ -42,7 +42,7 @@ async function ensureDefaults() {
 
 async function createMenus() {
   try { await chrome.contextMenus.removeAll(); } catch { /* ignore */ }
-  chrome.contextMenus.create({ id: MENU_ROOT, title: '拾图', contexts: ['all'] });
+  chrome.contextMenus.create({ id: MENU_ROOT, title: 'Ant-col 蚁穴', contexts: ['all'] });
   chrome.contextMenus.create({ id: 'save-image', parentId: MENU_ROOT, title: '保存这张图片到素材库', contexts: ['image'] });
   chrome.contextMenus.create({ id: 'save-video', parentId: MENU_ROOT, title: '保存这个视频到素材库', contexts: ['video'] });
   chrome.contextMenus.create({ id: 'save-link', parentId: MENU_ROOT, title: '保存链接卡片', contexts: ['link'] });
@@ -230,7 +230,7 @@ async function refreshBadge() {
   try {
     const index = await getIndex();
     const count = index.filter((e) => (e.status || 'kept') === 'inbox').length;
-    await chrome.action.setBadgeBackgroundColor({ color: '#FF5A3C' });
+    await chrome.action.setBadgeBackgroundColor({ color: '#ffffff' });
     await chrome.action.setBadgeText({ text: count > 0 ? String(Math.min(count, 99)) : '' });
   } catch { /* ignore */ }
 }

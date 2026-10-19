@@ -1,10 +1,10 @@
-export const APP_NAME = '拾图';
+export const APP_NAME = 'Ant-col 蚁穴';
 export const SCHEMA = 'shitu/v2';
 
 export const DEFAULT_SETTINGS = {
   // 'auto' = 若已选择文件夹则写文件夹，否则写下载目录；'folder' = 仅文件夹；'downloads' = 仅下载目录
   targetMode: 'auto',
-  downloadsSubfolder: '拾图素材',
+  downloadsSubfolder: 'Ant-col素材',
   autoTags: true,
   includeBackgroundImages: true,
   saveSidecar: true,

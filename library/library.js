@@ -701,9 +701,9 @@ function exportItems(format) {
         item.sourceUrl, item.pageUrl, item.relativePath, item.width, item.height, item.size, item.savedAt
       ].map(esc).join(','));
     }
-    downloadText('\ufeff' + rows.join('\r\n'), 'text/csv;charset=utf-8', `拾图-导出-${stamp}.csv`);
+    downloadText('\ufeff' + rows.join('\r\n'), 'text/csv;charset=utf-8', `Ant-col-导出-${stamp}.csv`);
   } else {
-    const lines = ['# 拾图素材导出', '', `导出时间：${new Date().toLocaleString()}`, ''];
+    const lines = ['# Ant-col 蚁穴 · 视觉资产导出', '', `导出时间：${new Date().toLocaleString()}`, ''];
     for (const item of items) {
       lines.push(`## ${item.name || '未命名素材'}`);
       lines.push('');
@@ -715,7 +715,7 @@ function exportItems(format) {
       if (item.relativePath) lines.push(`- 文件：\`${item.relativePath}\``);
       lines.push('');
     }
-    downloadText(lines.join('\n'), 'text/markdown;charset=utf-8', `拾图-导出-${stamp}.md`);
+    downloadText(lines.join('\n'), 'text/markdown;charset=utf-8', `Ant-col-导出-${stamp}.md`);
   }
   toast(`已导出 ${items.length} 项`);
 }

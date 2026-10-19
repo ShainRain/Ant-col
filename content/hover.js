@@ -169,8 +169,8 @@
           display: flex; align-items: center; gap: 10px;
           max-width: 340px; padding: 11px 14px;
           border-radius: 14px;
-          background: rgba(24,24,28,.94);
-          color: #FAF7F2; font: 13px/1.45 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+          background: rgba(8,9,10, .94);
+          color: #f7f9f9; font: 13px/1.45 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
           box-shadow: 0 12px 40px rgba(0,0,0,.38), 0 1px 0 rgba(255,255,255,.08) inset;
           backdrop-filter: blur(16px);
           transform: translateY(10px) scale(.97); opacity: 0;
@@ -178,9 +178,9 @@
           border: 1px solid rgba(255,255,255,.1);
         }
         .toast.show { transform: translateY(0) scale(1); opacity: 1; }
-        .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; background: #FF5A3C; }
-        .toast.error .dot { background: #FF4D4D; }
-        .toast.info .dot { background: #7C9CFF; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; background: #ffffff; }
+        .toast.error .dot { background: #ffffff; }
+        .toast.info .dot { background: #ffffff; }
         .text { white-space: pre-wrap; }
       </style>
       <div class="toast"><span class="dot"></span><span class="text"></span></div>
@@ -215,10 +215,10 @@
       <style>
         :host { all: initial; }
         .mask { position: fixed; inset: 0; background: transparent; cursor: crosshair; }
-        .box { position: fixed; border: 2px solid #FF5A3C; border-radius: 4px; pointer-events: none;
-               box-shadow: 0 0 0 9999px rgba(10,10,14,.22); transition: all .05s linear; }
+        .box { position: fixed; border: 2px solid #ffffff; border-radius: 4px; pointer-events: none;
+               box-shadow: 0 0 0 9999px rgba(8,9,10, .22); transition: all .05s linear; }
         .hint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
-                background: rgba(24,24,28,.94); color: #FAF7F2; padding: 8px 14px; border-radius: 10px;
+                background: rgba(8,9,10, .94); color: #f7f9f9; padding: 8px 14px; border-radius: 10px;
                 font: 12px/1.4 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif; pointer-events: none;
                 border: 1px solid rgba(255,255,255,.1); }
       </style>

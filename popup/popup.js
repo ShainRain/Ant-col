@@ -71,7 +71,7 @@ function renderTarget() {
   const useFolder = !!state.root && state.settings?.targetMode !== 'downloads';
   const name = useFolder
     ? state.root.name
-    : `下载 / ${state.settings?.downloadsSubfolder || '拾图素材'}`;
+    : `下载 / ${state.settings?.downloadsSubfolder || 'Ant-col素材'}`;
   $('#targetName').textContent = name;
   const dot = $('#targetDot');
   dot.className = 'target-dot';
@@ -266,7 +266,7 @@ async function scan() {
     $('#scanHint').textContent = '浏览器内部页面不支持，请切换到普通网页';
     $('#pageEmpty').hidden = false;
     $('#emptyTitle').textContent = '这里没有可保存的网页素材';
-    $('#emptyDesc').textContent = '打开一个普通网页，再点击拾图图标';
+    $('#emptyDesc').textContent = '打开网页开始搜寻视觉资产';
     updateSelectionUI();
     return;
   }
@@ -429,7 +429,7 @@ async function exportIndex() {
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     await chrome.downloads.download({
       url,
-      filename: `拾图索引-${stamp}.json`,
+      filename: `Ant-col索引-${stamp}.json`,
       saveAs: true
     });
     toast(`已导出 ${res.count} 项`);

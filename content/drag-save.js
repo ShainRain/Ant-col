@@ -164,10 +164,10 @@
         .card {
           width: min(540px, calc(100vw - 36px));
           min-height: 292px;
-          background: #fbfaf7;
-          color: #23221f;
-          border: 1px solid rgba(0,0,0,.06);
-          border-radius: 16px;
+          background: #08090a;
+          color: #f7f9f9;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 7px;
           box-shadow: 0 30px 90px rgba(0,0,0,.42), 0 2px 0 rgba(255,255,255,.8) inset;
           display: flex;
           padding: 10px;
@@ -182,9 +182,9 @@
         .card.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
         .left {
           width: 57%;
-          border: 1.5px dashed #d7d1c5;
-          border-radius: 10px;
-          background: #fffefa;
+          border: 1px dashed #727a7e;
+          border-radius: 5px;
+          background: #111315;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -196,12 +196,12 @@
           cursor: copy;
         }
         .left.over, .folder-item.over {
-          background: #fff3ec;
-          border-color: #f4512c !important;
+          background: rgba(255,255,255, .14);
+          border-color: #f7f9f9 !important;
         }
-        .art { width: 104px; height: 84px; color: #b8b2a7; }
-        .hint { font-size: 10.5px; color: #928b80; text-align: center; line-height: 1.55; }
-        .hint b { display: block; color: #2b2926; font-size: 12px; margin-top: 2px; font-weight: 650; }
+        .art { width: 104px; height: 84px; color: #727a7e; }
+        .hint { font-size: 10.5px; color: #a4aaad; text-align: center; line-height: 1.55; }
+        .hint b { display: block; color: #f7f9f9; font-size: 12px; margin-top: 2px; font-weight: 650; }
         .right {
           width: 43%;
           display: flex;
@@ -210,7 +210,7 @@
           padding: 3px 2px;
         }
         .list-title {
-          font-size: 9px; letter-spacing: .12em; color: #a49d92;
+          font-size: 9px; letter-spacing: .12em; color: #727a7e;
           padding: 4px 8px 5px; text-transform: uppercase;
         }
         .folders {
@@ -219,29 +219,29 @@
         }
         .folder-item {
           display: flex; align-items: center; gap: 7px;
-          height: 32px; padding: 0 8px; border-radius: 7px;
-          color: #6f685e; font-size: 11px; cursor: copy;
+          height: 32px; padding: 0 8px; border-radius: 5px;
+          color: #a4aaad; font-size: 11px; cursor: copy;
           border: 1px solid transparent;
           transition: background .12s, color .12s, border-color .12s;
         }
-        .folder-item:hover { background: #f4efe7; color: #2b2926; }
-        .folder-item .ico { display: inline-flex; color: #a49d92; }
-        .folder-item.over .ico { color: #f4512c; }
+        .folder-item:hover { background: #191c1f; color: #f7f9f9; }
+        .folder-item .ico { display: inline-flex; color: #a4aaad; }
+        .folder-item.over .ico { color: #f7f9f9; }
         .folder-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .folder-item .badge {
-          margin-left: auto; font-size: 8px; letter-spacing: .08em; color: #b0a89d;
-          border: 1px solid #e4ded3; border-radius: 999px; padding: 1px 5px;
+          margin-left: auto; font-size: 8px; letter-spacing: .08em; color: #c8ccce;
+          border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 1px 5px;
         }
-        .empty { color: #b0a89d; font-size: 10px; padding: 10px 8px; }
+        .empty { color: #c8ccce; font-size: 10px; padding: 10px 8px; }
         .choose {
           display: flex; align-items: center; gap: 7px;
           padding: 11px 8px 4px; margin-top: 6px;
-          border-top: 1px solid #ece6dc;
-          color: #8c8479; font-size: 10.5px; cursor: copy;
+          border-top: 1px solid #2a2e31;
+          color: #a4aaad; font-size: 10.5px; cursor: copy;
           border-radius: 0 0 7px 7px;
           transition: color .12s, background .12s;
         }
-        .choose:hover, .choose.over { color: #f4512c; background: #fff3ec; }
+        .choose:hover, .choose.over { color: #f7f9f9; background: #191c1f; }
         .plus {
           width: 17px; height: 17px; border-radius: 50%; border: 1px solid currentColor;
           display: grid; place-items: center; font-size: 13px; line-height: 1; flex: 0 0 auto;
@@ -251,7 +251,7 @@
         <div class="card" data-drop="collection" data-collection="">
           <div class="left" data-drop="collection" data-collection="">
             <svg class="art" viewBox="0 0 120 96" fill="none" aria-hidden="true">
-              <path d="M14 30c0-4.4 3.6-8 8-8h22l8 8h48c4.4 0 8 3.6 8 8v38c0 4.4-3.6 8-8 8H22c-4.4 0-8-3.6-8-8V30Z" fill="#fffdf9" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+              <path d="M14 30c0-4.4 3.6-8 8-8h22l8 8h48c4.4 0 8 3.6 8 8v38c0 4.4-3.6 8-8 8H22c-4.4 0-8-3.6-8-8V30Z" fill="#ffffff" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
               <path d="M14 38h92" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
               <circle cx="61" cy="60" r="18" stroke="currentColor" stroke-width="2.2"/>
               <path d="M61 42c-6 5-9 11-9 18s3 13 9 18M61 42c6 5 9 11 9 18s-3 13-9 18M44 60h34" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -387,37 +387,37 @@
     shadow.innerHTML = `
       <style>
         :host { all: initial; }
-        .backdrop { position: fixed; inset: 0; background: rgba(12,10,14,.36); backdrop-filter: blur(3px); }
+        .backdrop { position: fixed; inset: 0; background: rgba(8,9,10, .36); backdrop-filter: blur(3px); }
         .card {
           position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-          width: min(380px, calc(100vw - 32px)); background: #fbfaf7; color: #23221f;
-          border-radius: 15px; box-shadow: 0 28px 80px rgba(0,0,0,.4);
+          width: min(380px, calc(100vw - 32px)); background: #08090a; color: #f7f9f9;
+          border: 1px solid rgba(255,255,255,.14); border-radius: 7px; box-shadow: 0 28px 80px rgba(0,0,0,.4);
           padding: 16px; box-sizing: border-box;
           font: 12px/1.45 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
         }
         h3 { margin: 0 0 3px; font-size: 14px; letter-spacing: -.01em; }
-        .sub { color: #928b80; font-size: 10.5px; margin-bottom: 12px; }
+        .sub { color: #a4aaad; font-size: 10.5px; margin-bottom: 12px; }
         .rows { display: flex; flex-direction: column; gap: 4px; max-height: 190px; overflow-y: auto; }
         .row {
           display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 9px;
-          border: 1px solid transparent; border-radius: 8px; color: #6f685e; cursor: pointer;
+          border: 1px solid transparent; border-radius: 8px; color: #727a7e; cursor: pointer;
         }
-        .row:hover { background: #f5efe6; color: #23221f; }
-        .row.on { background: #fff1e9; border-color: #f4512c; color: #c94422; }
-        .row .ico { color: #a49d92; display: inline-flex; }
-        .row.on .ico { color: #f4512c; }
+        .row:hover { background: #191c1f; color: #f7f9f9; }
+        .row.on { background: rgba(255,255,255, .14); border-color: #f7f9f9; color: #f7f9f9; }
+        .row .ico { color: #a4aaad; display: inline-flex; }
+        .row.on .ico { color: #f7f9f9; }
         .row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sep { height: 1px; background: #ece6dc; margin: 10px 0; }
+        .sep { height: 1px; background: #2a2e31; margin: 10px 0; }
         input {
-          width: 100%; box-sizing: border-box; border: 1px solid #e4ded3; background: #fff;
+          width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.14); background: #111315; color: #f7f9f9;
           border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 11.5px; outline: none;
         }
-        input:focus { border-color: #f4512c; box-shadow: 0 0 0 3px rgba(244,81,44,.1); }
+        input:focus { border-color: #f7f9f9; box-shadow: 0 0 0 2px rgba(255,255,255, .14); }
         .actions { display: flex; gap: 8px; margin-top: 12px; }
         .actions button { border: 0; border-radius: 8px; padding: 9px 12px; font: inherit; font-size: 11.5px; cursor: pointer; }
-        .cancel { background: #f0ebe3; color: #5f584f; }
-        .ok { flex: 1; background: #f4512c; color: #fff; font-weight: 650; }
-        .status { min-height: 14px; margin-top: 7px; font-size: 10px; color: #c94422; }
+        .cancel { background: #191c1f; color: #727a7e; }
+        .ok { flex: 1; background: #f7f9f9; color: #08090a; font-weight: 650; }
+        .status { min-height: 14px; margin-top: 7px; font-size: 10px; color: #ffffff; }
       </style>
       <div class="backdrop" data-act="cancel"></div>
       <div class="card">
@@ -501,7 +501,7 @@
     const useFolder = root && settings.targetMode !== 'downloads';
     const base = useFolder
       ? (root.permission === 'granted' ? root.name : `${root.name}（需授权）`)
-      : `下载 / ${settings.downloadsSubfolder || '拾图素材'}`;
+      : `下载 / ${settings.downloadsSubfolder || 'Ant-col素材'}`;
     if (!collection || collection === DEFAULT_NAME()) return base;
     return `${base} / ${collection}`;
   }
@@ -549,92 +549,92 @@
     panelShadow.innerHTML = `
       <style>
         :host { all: initial; }
-        .backdrop { position: fixed; inset: 0; background: rgba(12,10,14,.42); backdrop-filter: blur(3px); }
+        .backdrop { position: fixed; inset: 0; background: rgba(8,9,10, .42); backdrop-filter: blur(3px); }
         .panel {
           position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
           width: min(440px, calc(100vw - 30px)); max-height: min(88vh, 760px); overflow-y: auto;
-          background: #fbfaf7; color: #23221f;
-          border: 1px solid rgba(0,0,0,.06);
-          border-radius: 16px;
+          background: #08090a; color: #f7f9f9;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 7px;
           box-shadow: 0 30px 90px rgba(0,0,0,.42);
           padding: 16px; box-sizing: border-box;
           font: 13px/1.45 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
         }
         .phead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .brand { display: flex; align-items: center; gap: 7px; font-size: 12px; letter-spacing: .06em; }
-        .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: #f4512c; box-shadow: 0 0 0 4px rgba(244,81,44,.12); }
+        .brand .dot { width: 9px; height: 9px; border-radius: 2px; background: #f7f9f9; }
         .brand b { font-size: 13px; letter-spacing: .02em; }
-        .brand .crumb { color: #928b80; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
-        .x { border: 0; background: transparent; color: #928b80; font-size: 22px; line-height: 1; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
-        .x:hover { background: rgba(25,24,28,.06); color: #23221f; }
+        .brand .crumb { color: #a4aaad; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+        .x { border: 0; background: transparent; color: #a4aaad; font-size: 22px; line-height: 1; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; }
+        .x:hover { background: #191c1f; color: #f7f9f9; }
         .preview {
           position: relative; height: 158px; border-radius: 10px; overflow: hidden;
-          background: #f3eee6;
+          background: #111315;
           background-image: linear-gradient(45deg, rgba(0,0,0,.03) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.03) 75%), linear-gradient(45deg, rgba(0,0,0,.03) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.03) 75%);
           background-size: 18px 18px; background-position: 0 0, 9px 9px;
           display: grid; place-items: center; margin-bottom: 12px;
         }
         .preview img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-        .glyph { font-size: 34px; color: #b8b2a7; }
+        .glyph { font-size: 34px; color: #727a7e; }
         .linkbadge {
           position: absolute; left: 9px; top: 9px; font-size: 9px; letter-spacing: .12em;
-          background: rgba(30,29,27,.82); color: #fffdf8; border-radius: 999px; padding: 3px 8px;
+          background: rgba(17,19,21, .82); color: #ffffff; border-radius: 999px; padding: 3px 8px;
         }
         .dims {
           position: absolute; right: 9px; bottom: 9px; font-size: 9px;
-          background: rgba(30,29,27,.72); color: #fffdf8; border-radius: 6px; padding: 3px 6px;
+          background: rgba(17,19,21, .72); color: #ffffff; border-radius: 6px; padding: 3px 6px;
         }
         .field { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
-        .field > span { font-size: 9.5px; letter-spacing: .1em; color: #a49d92; text-transform: uppercase; }
+        .field > span { font-size: 9.5px; letter-spacing: .1em; color: #a4aaad; text-transform: uppercase; }
         input.title, textarea.note {
-          width: 100%; box-sizing: border-box; border: 1px solid #e4ded3; background: #fff;
-          border-radius: 8px; padding: 8px 10px; font: inherit; outline: none;
+          width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.14); background: #111315; color: #f7f9f9;
+          border-radius: 5px; padding: 8px 10px; font: inherit; outline: none;
         }
         input.title { font-size: 13px; font-weight: 600; }
         textarea.note { resize: vertical; min-height: 42px; max-height: 120px; font-size: 12px; }
-        input.title:focus, textarea.note:focus, .tagbox:focus-within { border-color: #f4512c; box-shadow: 0 0 0 3px rgba(244,81,44,.1); }
+        input.title:focus, textarea.note:focus, .tagbox:focus-within { border-color: #f7f9f9; box-shadow: 0 0 0 2px rgba(255,255,255, .14); }
         .modes { display: flex; gap: 6px; margin-top: 9px; }
         .modes button {
-          flex: 1; border: 1px solid #e4ded3; background: #fff; color: #7d756b;
-          border-radius: 8px; padding: 7px 8px; font-size: 11px; cursor: pointer;
+          flex: 1; border: 1px solid rgba(255,255,255,.14); background: #111315; color: #a4aaad;
+          border-radius: 5px; padding: 7px 8px; font-size: 11px; cursor: pointer;
         }
-        .modes button.on { border-color: #f4512c; background: #fff1e9; color: #c94422; font-weight: 650; }
+        .modes button.on { border-color: #f7f9f9; background: rgba(255,255,255, .14); color: #f7f9f9; font-weight: 650; }
         .modes[hidden] { display: none; }
         .tagbox {
           display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
-          border: 1px solid #e4ded3; background: #fff; border-radius: 8px; padding: 4px 6px;
+          border: 1px solid rgba(255,255,255,.14); background: #111315; border-radius: 5px; padding: 4px 6px;
         }
         .chips { display: flex; flex-wrap: wrap; gap: 4px; }
         .chip {
-          display: inline-flex; align-items: center; gap: 4px; background: #fff1e9;
-          color: #c94422; border-radius: 5px; padding: 2px 6px; font-size: 10.5px;
+          display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255, .14);
+          color: #fff; border-radius: 4px; padding: 2px 6px; font-size: 10.5px;
         }
         .chip button { border: 0; background: none; color: inherit; padding: 0; cursor: pointer; opacity: .7; }
         .tagin { border: 0; background: transparent; padding: 3px 0; flex: 1; min-width: 90px; font-size: 11px; outline: none; box-shadow: none !important; }
         .suggest { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
         .suggest button {
-          border: 1px solid #e8e2d8; background: transparent; color: #928b80;
+          border: 1px solid rgba(255,255,255,.14); background: transparent; color: #a4aaad;
           border-radius: 999px; padding: 2px 8px; font-size: 10px; cursor: pointer;
         }
-        .suggest button:hover { border-color: #f4512c; color: #c94422; }
+        .suggest button:hover { border-color: #f7f9f9; color: #fff; }
         .dest {
           display: flex; align-items: center; gap: 7px; margin-top: 12px; padding: 8px 10px;
-          background: #f4efe7; border-radius: 8px; font-size: 10.5px; color: #928b80;
+          background: #111315; border: 1px solid rgba(255,255,255,.14); border-radius: 5px; font-size: 10.5px; color: #a4aaad;
         }
-        .dest b { color: #23221f; font-weight: 600; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .dest .change { margin-left: auto; border: 0; background: transparent; color: #c94422; font-size: 10px; cursor: pointer; text-decoration: underline; }
-        .status { min-height: 18px; margin-top: 8px; font-size: 10.5px; color: #c94422; }
-        .status.ok { color: #1f8d62; }
+        .dest b { color: #f7f9f9; font-weight: 600; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dest .change { margin-left: auto; border: 0; background: transparent; color: #f7f9f9; font-size: 10px; cursor: pointer; text-decoration: underline; }
+        .status { min-height: 18px; margin-top: 8px; font-size: 10.5px; color: #ffffff; }
+        .status.ok { color: #f7f9f9; }
         .actions { display: flex; gap: 8px; margin-top: 4px; }
-        .actions button { border: 0; border-radius: 8px; padding: 10px 14px; font: inherit; font-size: 12px; cursor: pointer; }
-        .cancel { background: #f0ebe3; color: #5f584f; }
-        .save { flex: 1; background: #f4512c; color: #fff; font-weight: 650; box-shadow: 0 8px 20px rgba(244,81,44,.22); }
+        .actions button { border: 0; border-radius: 5px; padding: 10px 14px; font: inherit; font-size: 12px; cursor: pointer; }
+        .cancel { background: #191c1f; color: #f7f9f9; }
+        .save { flex: 1; background: #f7f9f9; color: #08090a; font-weight: 650; }
         .save:disabled { opacity: .45; cursor: default; box-shadow: none; }
       </style>
       <div class="backdrop" data-act="close"></div>
       <div class="panel" role="dialog" aria-modal="true" aria-label="保存到素材库">
         <div class="phead">
-          <div class="brand"><span class="dot"></span><b>拾图</b><span class="crumb">保存素材</span></div>
+          <div class="brand"><span class="dot"></span><b>Ant-col</b><span class="crumb">保存素材</span></div>
           <button class="x" data-act="close" title="关闭">×</button>
         </div>
         <div class="preview">
