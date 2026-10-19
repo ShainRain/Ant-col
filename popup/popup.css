@@ -469,7 +469,7 @@ select {
   padding: 9px 15px;
   font-size: 12px;
   font-weight: 650;
-  color: #fff;
+  color: var(--paper);
   background: var(--coral);
   box-shadow: none;
   transition: transform 0.12s, opacity 0.12s;
