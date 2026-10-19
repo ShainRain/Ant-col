@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>拾图 · 素材库</title>
+  <link rel="stylesheet" href="library.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <div class="brand">
+        <img src="../icons/icon48.png" width="34" height="34" alt="" />
+        <div><strong>拾图</strong><span>视觉收件箱</span></div>
+      </div>
+
+      <button class="triage-btn" id="triageBtn">
+        <span class="triage-icon">✦</span>
+        <span>整理 Inbox</span>
+        <em id="inboxBadge">0</em>
+      </button>
+
+      <nav class="nav" id="mainNav">
+        <button data-view="inbox"><span class="nav-glyph">◐</span><span>Inbox</span><em data-count="inbox">0</em></button>
+        <button data-view="all"><span class="nav-glyph">▦</span><span>全部素材</span><em data-count="all">0</em></button>
+        <button data-view="kept"><span class="nav-glyph">✓</span><span>已整理</span><em data-count="kept">0</em></button>
+        <button data-view="archived"><span class="nav-glyph">◌</span><span>归档</span><em data-count="archived">0</em></button>
+      </nav>
+
+      <div class="rail-section">
+        <div class="rail-title"><span>项目</span><button id="newProjectBtn" title="新建项目">＋</button></div>
+        <div class="rail-list" id="projectList"></div>
+      </div>
+
+      <div class="rail-section tags-section">
+        <div class="rail-title"><span>标签</span></div>
+        <div class="tag-cloud" id="tagList"></div>
+      </div>
+
+      <div class="rail-foot">
+        <button id="openFolderBtn">打开文件夹</button>
+        <button id="settingsBtn">设置</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="m20 20-4.2-4.2m1.7-5.3a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+          <input id="searchInput" placeholder="搜索名称、来源、项目、标签…" autocomplete="off" />
+          <kbd>/</kbd>
+        </div>
+        <select id="kindFilter" title="素材类型">
+          <option value="all">全部类型</option>
+          <option value="image">图片</option>
+          <option value="screenshot">截图</option>
+          <option value="video">视频</option>
+          <option value="link">链接</option>
+        </select>
+        <select id="sortSelect" title="排序">
+          <option value="newest">最新优先</option>
+          <option value="oldest">最早优先</option>
+          <option value="name">名称 A–Z</option>
+          <option value="size">文件大小</option>
+        </select>
+        <div class="top-actions">
+          <button id="exportMdBtn">导出 MD</button>
+          <button id="exportCsvBtn">CSV</button>
+          <button class="icon-btn" id="refreshBtn" title="刷新">↻</button>
+        </div>
+      </header>
+
+      <section class="page-head">
+        <div>
+          <h1 id="viewTitle">Inbox</h1>
+          <p id="viewSubtitle">收进来，再慢慢整理。</p>
+        </div>
+        <div class="head-actions">
+          <button id="selectAllBtn">全选</button>
+          <button id="clearSelectionBtn" hidden>取消选择</button>
+          <span class="result-count" id="resultCount"></span>
+        </div>
+      </section>
+
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" hidden>
+        <div class="empty-art">◌</div>
+        <h2 id="emptyTitle">这里还是空的</h2>
+        <p id="emptyDesc">去网页上拖一张图进来，或者在工具栏打开拾图。</p>
+      </div>
+      <button class="load-more" id="loadMoreBtn" hidden>加载更多</button>
+    </main>
+  </div>
+
+  <div class="batch" id="batchBar" hidden>
+    <span class="batch-count"><b id="batchCount">0</b> 项已选</span>
+    <select id="batchProject"><option value="">移到项目…</option></select>
+    <button id="batchTagBtn">加标签</button>
+    <button id="batchKeepBtn">标记已整理</button>
+    <button id="batchArchiveBtn">归档</button>
+    <button class="batch-clear" id="batchClearBtn">取消</button>
+  </div>
+
+  <div id="drawerRoot"></div>
+  <div id="triageRoot"></div>
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="library.js"></script>
+</body>
+</html>

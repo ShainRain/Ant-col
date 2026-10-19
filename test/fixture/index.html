@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>拾图测试画廊 · Fixture</title>
+<style>
+  body { margin: 0; font: 14px/1.5 system-ui, "Microsoft YaHei", sans-serif; background:#f4efe6; color:#1b1a1e; }
+  header { padding: 28px; }
+  h1 { margin:0 0 6px; font-size: 24px; }
+  main { padding: 0 28px 60px; display:grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  figure { margin:0; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.08); }
+  img { display:block; width:100%; height:auto; }
+  figcaption { padding:8px 12px; font-size:12px; color:#777; }
+  .bg { height: 320px; border-radius:14px; background-image:url('bg.png'); background-size:cover; background-position:center; }
+  .link { display:inline-block; margin-top:8px; }
+  video { width:100%; display:block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>拾图测试画廊</h1>
+  <p>用于验证图片扫描、悬停保存、背景图、视频封面与截图。</p>
+  <a class="link" href="https://example.com/article">示例链接</a>
+</header>
+<main>
+  <figure><img id="hero" src="art-1.jpg" alt="横向抽象画 1600x1000" /><figcaption>art-1.jpg · 1600×1000</figcaption></figure>
+  <figure><a href="https://example.com/art-2" target="_blank" rel="noopener"><img id="portrait" src="art-2.png" alt="纵向几何画 900x1200" /></a><figcaption>art-2.png · 900×1200</figcaption></figure>
+  <div class="bg" title="CSS 背景图"></div>
+  <figure><img id="tiny" src="tiny.png" alt="很小的图标 80x80" /><figcaption>tiny.png · 80×80</figcaption></figure>
+  <figure><video poster="poster.jpg" controls preload="none"></video><figcaption>视频封面 poster.jpg</figcaption></figure>
+</main>
+</body>
+</html>

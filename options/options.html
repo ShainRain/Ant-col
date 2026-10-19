@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>拾图 · 设置</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-brand">
+        <img src="../icons/icon128.png" width="56" height="56" alt="" />
+        <div>
+          <h1>拾图 <span>Shitu</span></h1>
+          <p>把网页上的视觉素材，安静地收进你自己的项目素材库。</p>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div><strong id="statCount">0</strong><span>已收藏</span></div>
+        <div><strong id="statSize">0 B</strong><span>占用空间</span></div>
+        <div><strong id="statToday">0</strong><span>今天</span></div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>保存位置</h2>
+          <p>素材会直接写入你选择的文件夹，不经过云端。未选择时保存到下载文件夹。</p>
+        </div>
+      </div>
+
+      <div class="mode-grid" id="modeGrid">
+        <label class="mode-option">
+          <input type="radio" name="targetMode" value="auto" />
+          <div>
+            <strong>自动</strong>
+            <span>有文件夹就用文件夹，否则用下载目录</span>
+          </div>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="targetMode" value="folder" />
+          <div>
+            <strong>仅素材库文件夹</strong>
+            <span>没有授权时保存会失败并提醒</span>
+          </div>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="targetMode" value="downloads" />
+          <div>
+            <strong>仅下载目录</strong>
+            <span>保存到浏览器下载文件夹下的子目录</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="folder-panel" id="folderPanel">
+        <div class="folder-info">
+          <div class="folder-icon">▤</div>
+          <div>
+            <strong id="folderName">尚未选择文件夹</strong>
+            <span id="folderStatus">默认：下载文件夹 / 拾图素材</span>
+          </div>
+        </div>
+        <div class="folder-actions">
+          <button class="primary" id="chooseFolder">选择文件夹…</button>
+          <button class="secondary" id="reauthorize" hidden>重新授权</button>
+          <button class="secondary danger" id="clearFolder" hidden>移除</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="downloadsSubfolder">下载目录下的子文件夹</label>
+        <input id="downloadsSubfolder" type="text" placeholder="拾图素材" />
+        <small>仅当使用下载目录模式时生效。</small>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>整理规则</h2>
+          <p>文件名、去重与元数据。所有规则都只在本机执行。</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="filenameTemplate">文件名模板</label>
+        <input id="filenameTemplate" type="text" />
+        <small>可用变量：<code>{date}</code> <code>{time}</code> <code>{site}</code> <code>{name}</code> <code>{month}</code>。默认按时间排序。</small>
+      </div>
+
+      <div class="field">
+        <label for="collectionsInput">项目 / 主题（拖拽页右侧显示）</label>
+        <input id="collectionsInput" type="text" placeholder="灵感收集, 日常审美, 帮催作品" />
+        <small>用逗号分隔；第一个为默认项目。默认项目不额外建子文件夹，其他名称会在素材库下建同名目录。也可以在拖拽页点「建立或选择文件夹」临时新增。</small>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="minImageSize">批量扫描的最小尺寸</label>
+          <select id="minImageSize">
+            <option value="0">全部</option>
+            <option value="200">≥ 200px</option>
+            <option value="500">≥ 500px</option>
+            <option value="1000">≥ 1000px</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="screenshotFormat">截图格式</label>
+          <select id="screenshotFormat">
+            <option value="png">PNG（无损）</option>
+            <option value="jpg">JPG（更小）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="dedupe" /><span><strong>按内容去重</strong><small>相同 SHA-256 的素材只保存一次</small></span></label>
+        <label class="toggle"><input type="checkbox" id="saveSidecar" /><span><strong>写入同名 JSON</strong><small>记录来源、尺寸、标签，方便以后迁移</small></span></label>
+        <label class="toggle"><input type="checkbox" id="autoTags" /><span><strong>自动标签</strong><small>自动加入站点名，例如 unsplash</small></span></label>
+        <label class="toggle"><input type="checkbox" id="includeBackgroundImages" /><span><strong>扫描 CSS 背景图</strong><small>批量保存时包含背景图片</small></span></label>
+        <label class="toggle"><input type="checkbox" id="useReferrer" /><span><strong>携带来源页 Referer</strong><small>减少部分站点的防盗链失败</small></span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>素材库</h2>
+          <p>在独立页面里整理 Inbox、搜索项目素材、批量移动和导出。扩展只负责采集，素材库负责回看与交付。</p>
+        </div>
+      </div>
+      <div class="data-actions">
+        <button class="primary" id="openLibrary">打开素材库</button>
+        <button class="secondary" id="exportJson">导出索引 JSON</button>
+        <button class="secondary" id="exportCsv">导出 CSV</button>
+        <button class="secondary" id="openDownloads">打开下载文件夹</button>
+        <button class="secondary danger" id="clearIndex">清空本地索引</button>
+      </div>
+      <p class="muted" id="indexInfo"></p>
+    </section>
+
+    <footer class="footer">
+      <span>拾图 v1.0 · 完全本地 · 不上传任何内容</span>
+      <span>快捷键：Alt+S 保存悬停 · Alt+Shift+S 可见截图 · Alt+Shift+E 元素截图 · Alt+Shift+F 整页 · 批量走工具栏图标</span>
+    </footer>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

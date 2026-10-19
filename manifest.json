@@ -1,0 +1,76 @@
+{
+  "manifest_version": 3,
+  "name": "拾图 · 视觉收件箱",
+  "short_name": "拾图",
+  "version": "1.1.0",
+  "description": "把网页上的图片、视频、截图和链接收进本地项目素材库，带来源、标签与备注，完全本地使用。",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "downloads",
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "拾图 · 视觉素材库",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "options/options.html",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file:///*"],
+      "js": ["content/hover.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": ["http://*/*", "https://*/*", "file:///*"],
+      "js": ["content/drag-save.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "save-hovered": {
+      "suggested_key": { "default": "Alt+S" },
+      "description": "保存鼠标悬停的图片 / 视频"
+    },
+    "screenshot-visible": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "保存当前可见区域截图"
+    },
+    "screenshot-element": {
+      "suggested_key": { "default": "Alt+Shift+E" },
+      "description": "框选页面元素截图"
+    },
+    "screenshot-full": {
+      "suggested_key": { "default": "Alt+Shift+F" },
+      "description": "保存整页截图"
+    },
+    "save-page-images": {
+      "description": "打开本页图片批量保存（可在扩展快捷键页自行绑定）"
+    }
+  }
+}

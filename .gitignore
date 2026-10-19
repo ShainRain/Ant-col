@@ -1,0 +1,13 @@
+# Generated test downloads and local artifacts
+test/out/downloads/
+_incoming_antcol/
+node_modules/
+*.log
+*.zip
+.DS_Store
+Thumbs.db
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example

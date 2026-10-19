@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>拾图</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="../icons/icon48.png" width="30" height="30" alt="" />
+        <div class="brand-text">
+          <strong>拾图</strong>
+          <span>视觉收件箱</span>
+        </div>
+      </div>
+      <button class="target-chip" id="targetChip" title="更改保存位置">
+        <span class="target-dot" id="targetDot"></span>
+        <span class="target-name" id="targetName">读取中…</span>
+      </button>
+      <button class="icon-btn" id="libraryBtn" title="打开素材库">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="设置">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9.4 4c0-.6-.05-1.18-.15-1.74l2.02-1.57-2-3.46-2.38.96a9.2 9.2 0 0 0-3-1.73L15.5 2h-4l-.39 2.46a9.2 9.2 0 0 0-3 1.73L5.73 5.23l-2 3.46 2.02 1.57a9.4 9.4 0 0 0 0 3.48L3.73 15.3l2 3.46 2.38-.96a9.2 9.2 0 0 0 3 1.73L11.5 22h4l.39-2.46a9.2 9.2 0 0 0 3-1.73l2.38.96 2-3.46-2.02-1.57c.1-.56.15-1.14.15-1.74Z"/></svg>
+      </button>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="page">本页</button>
+      <button class="tab" data-tab="recent">最近</button>
+      <div class="tab-ink"></div>
+    </nav>
+
+    <main class="content">
+      <section class="view view-page active" id="viewPage">
+        <div class="scan-toolbar">
+          <div class="scan-meta">
+            <span id="scanCount">正在扫描…</span>
+            <span class="scan-hint" id="scanHint"></span>
+          </div>
+          <div class="scan-actions">
+            <select id="sizeFilter" title="最小尺寸">
+              <option value="0">全部尺寸</option>
+              <option value="200" selected>≥ 200px</option>
+              <option value="500">≥ 500px</option>
+              <option value="1000">≥ 1000px</option>
+            </select>
+            <button class="icon-btn small" id="rescanBtn" title="重新扫描">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7Z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-wrap" id="gridWrap">
+          <div class="grid" id="grid"></div>
+          <div class="shortcut-hint">
+            <span><b>Alt+S</b> 保存悬停</span>
+            <span><b>Alt+Shift+S</b> 可见截图</span>
+            <span><b>Alt+Shift+E</b> 元素截图</span>
+            <span><b>Alt+Shift+F</b> 整页截图</span>
+          </div>
+          <div class="empty" id="pageEmpty" hidden>
+            <div class="empty-art">◐</div>
+            <p id="emptyTitle">没有发现可保存的图片</p>
+            <span id="emptyDesc">试试右键页面上的图片，或调整尺寸筛选</span>
+          </div>
+        </div>
+
+        <div class="first-run" id="firstRun" hidden>
+          <div>
+            <strong>保存到任意文件夹</strong>
+            <span>现在默认进入下载文件夹。选择一个素材库文件夹，所有素材会直接写到你指定的位置。</span>
+          </div>
+          <button id="chooseFolderBtn">选择文件夹</button>
+        </div>
+
+        <footer class="composer" id="composer">
+          <div class="meta-inputs">
+            <div class="tag-box" id="tagBox">
+              <span class="tag-label">标签</span>
+              <div class="chips" id="tagChips"></div>
+              <input id="tagInput" list="tagSuggestions" placeholder="输入后回车" autocomplete="off" />
+              <datalist id="tagSuggestions"></datalist>
+            </div>
+            <textarea id="noteInput" rows="1" placeholder="备注（可选）"></textarea>
+          </div>
+          <div class="save-row">
+            <label class="select-all"><input type="checkbox" id="selectAll" /> <span>全选</span></label>
+            <button class="save-btn" id="saveBtn" disabled>
+              <span id="saveBtnText">保存</span>
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3v10.2l3.6-3.6L17 11l-5 5-5-5 1.4-1.4L12 13.2V3h0Z"/></svg>
+            </button>
+          </div>
+          <div class="progress" id="progress" hidden><div class="progress-bar" id="progressBar"></div></div>
+        </footer>
+      </section>
+
+      <section class="view view-recent" id="viewRecent">
+        <div class="recent-head">
+          <div>
+            <strong id="recentTitle">最近收进</strong>
+            <span id="recentStats"></span>
+          </div>
+          <div class="recent-actions">
+            <button class="ghost-btn" id="exportBtn">导出索引</button>
+            <button class="ghost-btn" id="openFolderBtn">下载文件夹</button>
+          </div>
+        </div>
+        <div class="recent-list" id="recentList"></div>
+        <div class="empty" id="recentEmpty" hidden>
+          <div class="empty-art">✦</div>
+          <p>还没有收进任何素材</p>
+          <span>在「本页」选择图片，或拖动网页里的图片</span>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+  </div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
