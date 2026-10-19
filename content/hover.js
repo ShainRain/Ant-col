@@ -201,7 +201,9 @@
     const toast = shadow.querySelector('.toast');
     shadow.querySelector('.text').textContent = String(text).slice(0, 220);
     toast.className = `toast ${tone}`;
-    requestAnimationFrame(() => toast.classList.add('show'));
+    // 同步触发重排后再加 show，避免 requestAnimationFrame 在后台/节流页面里不执行导致“有内容但不可见”
+    void toast.offsetWidth;
+    toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
   }

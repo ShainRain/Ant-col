@@ -477,7 +477,12 @@ export const URL_RULES = [
 
 **本轮验证**
 
-- `node test/e2e.js`：全流程通过；新增「星级持久化」「拖拽直存不开面板」两条断言（`star=5`、`panelAbsent=true`）。
+- `node test/e2e.js`：全流程通过；新增「星级持久化」「拖拽直存不开面板」「遮罩区 drop 必须保存」断言（`star=5`、`panelAbsent=true`）。
 - `node test/unit-url-rules.mjs`：74 项通过；`node test/unit-extract.mjs`：42 项通过。
 - 版本：`manifest.json` / `package.json` → `1.3.0`。
+
+**v1.3.1 修复（拖拽保存无动作）**
+
+- 根因：drop 监听只挂在 540×292 的卡片上，用户把素材拖到卡片外的暗色遮罩松手时 `event.target.closest('[data-drop]')` 为空，直接 `return`，既不保存也不提示。
+- 修复：整块遮罩接收 drop（默认项目，`Shift` 打开面板）；补「正在保存…」即时提示；toast 改为同步显示，避免 rAF 节流导致不可见；e2e 增加真实 `Input.dispatchDragEvent` 命中测试用例。
 

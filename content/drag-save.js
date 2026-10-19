@@ -237,7 +237,7 @@
         :host { all: initial; }
         .wrap {
           position: fixed; inset: 0; display: grid; place-items: center;
-          pointer-events: none;
+          pointer-events: auto;
         }
         .card {
           width: min(540px, calc(100vw - 36px));
@@ -384,6 +384,24 @@
         directSave(item, name);
       }
     });
+
+    // 卡片外的暗色遮罩也接受 drop：默认存入默认项目，Shift 打开编辑面板。
+    // 卡片内的 drop 会被上面的处理器 stopPropagation，不会重复触发。
+    const dropWrap = dropShadow.querySelector('.wrap');
+    dropWrap.addEventListener('dragover', (event) => {
+      if (!dragged) return;
+      event.preventDefault();
+      try { event.dataTransfer.dropEffect = 'copy'; } catch { /* ignore */ }
+    });
+    dropWrap.addEventListener('drop', (event) => {
+      if (!dragged) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const item = dragged;
+      hideDropPage();
+      if (event.shiftKey) openPanel(item, DEFAULT_NAME());
+      else directSave(item, DEFAULT_NAME());
+    });
   }
 
   function renderDropCollections() {
@@ -437,8 +455,24 @@
     }, 170);
   }
 
+  let fallbackToast = null;
+
   function toast(text, tone = 'success') {
-    try { window.__antColToast?.(text, tone); } catch { /* ignore */ }
+    // hover.js 的 toast 依赖 rAF 显示，页面被节流时可能不出现；这里提供独立兜底。
+    if (window.__antColToast) {
+      try { window.__antColToast(text, tone); return; } catch { /* fall through */ }
+    }
+    let host = fallbackToast;
+    if (!host || !document.documentElement.contains(host)) {
+      host = document.createElement('div');
+      host.style.cssText = 'position:fixed;right:22px;bottom:22px;z-index:2147483647;max-width:320px;padding:11px 14px;border-radius:12px;background:rgba(8,9,10,.94);color:#f7f9f9;font:13px/1.45 system-ui,"Segoe UI","Microsoft YaHei",sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.38);opacity:0;transition:opacity .18s;pointer-events:none;';
+      document.documentElement.appendChild(host);
+      fallbackToast = host;
+    }
+    host.textContent = String(text || '');
+    host.style.opacity = '1';
+    clearTimeout(host._timer);
+    host._timer = setTimeout(() => { host.style.opacity = '0'; }, 3200);
   }
 
   // 拖到项目行/左侧区域：默认「放下即入库」，按住 Shift 才打开编辑面板。
@@ -461,6 +495,7 @@
       pageTitle: item.pageTitle || document.title
     };
     try {
+      toast(`正在保存到「${collectionName}」…`, 'info');
       const response = await chrome.runtime.sendMessage({
         type: 'save',
         items: [payload],

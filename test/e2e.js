@@ -6,14 +6,14 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ext = path.resolve(__dirname, '..');
+const ext = process.env.ANTCOL_EXT ? path.resolve(process.env.ANTCOL_EXT) : path.resolve(__dirname, '..');
 const fixture = path.join(__dirname, 'fixture');
 const out = path.join(__dirname, 'out');
 const downloads = path.join(out, 'downloads');
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(downloads, { recursive: true });
 
-const edge = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+const edge = process.env.ANTCOL_BROWSER || 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'ant-col-e2e-'));
 fs.mkdirSync(path.join(profile, 'Default'), { recursive: true });
 fs.writeFileSync(path.join(profile, 'Default', 'Preferences'), JSON.stringify({
@@ -169,6 +169,8 @@ async function main() {
   if (!fixtureTarget) throw new Error('fixture page target not found');
   const page = await connectTarget(fixtureTarget);
   await page.send('Page.bringToFront');
+  await page.send('Runtime.enable').catch(() => {});
+  await page.send('Log.enable').catch(() => {});
   await sleep(700);
 
   await evalIn(page, `(() => {
@@ -307,6 +309,57 @@ async function main() {
   if (starClick.onCount !== 5) throw new Error(`star UI on-count ${starClick.onCount}, expected 5`);
   if (!starItem || Number(starItem.star) !== 5) throw new Error(`star not persisted: ${JSON.stringify(starItem)}`);
   log('star rating', JSON.stringify({ onCount: starClick.onCount, star: starItem.star }));
+
+  // v1.3: drop on the left zone without Shift = direct save to default project
+  await evalIn(page, `(() => {
+    const el = document.querySelector('#extra');
+    const dt = new DataTransfer();
+    el.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await sleep(300);
+  await evalIn(page, `(() => {
+    const host = document.getElementById('ant-col-drop-host');
+    const left = host?.shadowRoot?.querySelector('.left');
+    const dt = new DataTransfer();
+    left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await sleep(1500);
+  const leftPanelAbsent = !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false));
+  const toastText = await evalIn(page, `(() => {
+    const host = document.getElementById('ant-col-toast-host');
+    return host?.shadowRoot?.querySelector('.toast.show .text')?.textContent || '';
+  })()`).catch(() => '');
+  const leftDirectItem = await waitFor(async () => {
+    const res = await evalIn(popup, `chrome.runtime.sendMessage({ type: 'library-state' })`);
+    return (res?.items || []).find((item) => item.kind === 'image' && String(item.sourceUrl || '').includes('extra.png')) || null;
+  }, 15000);
+  if (!leftPanelAbsent) throw new Error('left direct save unexpectedly opened the panel');
+  if (!leftDirectItem) throw new Error(`left direct save did not create an item (toast: ${toastText})`);
+  log('left direct save', JSON.stringify({ panelAbsent: leftPanelAbsent, toast: toastText, id: leftDirectItem.id, collection: leftDirectItem.collection }));
+
+  // v1.3.1: 真实 hit-test 下，在卡片外的暗色遮罩松手也必须保存到默认项目
+  await evalIn(page, `(() => {
+    const el = document.querySelector('#extra2');
+    const dt = new DataTransfer();
+    el.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    return true;
+  })()`);
+  await waitFor(async () => evalIn(page, `(() => { const h = document.getElementById('ant-col-drop-host'); return !!(h && h.style.display === 'block' && h.shadowRoot?.querySelector('.card.show')); })()`), 4000);
+  const dragData = { items: [{ mimeType: 'text/uri-list', data: `http://127.0.0.1:${PORT}/extra2.png` }], dragOperationsMask: 1 };
+  await page.send('Input.dispatchDragEvent', { type: 'dragEnter', x: 12, y: 12, data: dragData });
+  await page.send('Input.dispatchDragEvent', { type: 'dragOver', x: 12, y: 12, data: dragData });
+  await page.send('Input.dispatchDragEvent', { type: 'drop', x: 12, y: 12, data: dragData });
+  const backdropItem = await waitFor(async () => {
+    const res = await evalIn(popup, `chrome.runtime.sendMessage({ type: 'library-state' })`);
+    return (res?.items || []).find((item) => item.kind === 'image' && String(item.sourceUrl || '').includes('extra2.png')) || null;
+  }, 15000);
+  const backdropPanelAbsent = !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false));
+  if (!backdropItem) throw new Error('backdrop drop did not save');
+  if (!backdropPanelAbsent) throw new Error('backdrop drop unexpectedly opened the panel');
+  log('backdrop drop', JSON.stringify({ id: backdropItem.id, collection: backdropItem.collection }));
 
   // v1.3: drop on a project = direct save (no panel); Shift keeps the editor
   await evalIn(page, `(() => {
@@ -810,6 +863,8 @@ async function main() {
 
   const swErrors = sw.events.filter((e) => e.method === 'Runtime.exceptionThrown' || e.method === 'Log.entryAdded');
   log('sw errors', JSON.stringify(swErrors.slice(-10), null, 2));
+  const contentErrors = page.events.filter((e) => e.method === 'Runtime.exceptionThrown');
+  log('content exceptions', JSON.stringify(contentErrors.slice(-10), null, 2));
 
   console.log('\n=== SUMMARY ===');
   console.log(JSON.stringify({
