@@ -798,6 +798,6 @@ function bind() {
   bind();
   await load();
   if (new URLSearchParams(location.search).has('test')) {
-    window.__shituLibrary = { state, load, filtered, openDetail, startTriage, updateItems, exportItems };
+    window.__antColLibrary = { state, load, filtered, openDetail, startTriage, updateItems, exportItems };
   }
 })();

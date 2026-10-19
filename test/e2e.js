@@ -14,7 +14,7 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(downloads, { recursive: true });
 
 const edge = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'shitu-e2e-'));
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'ant-col-e2e-'));
 fs.mkdirSync(path.join(profile, 'Default'), { recursive: true });
 fs.writeFileSync(path.join(profile, 'Default', 'Preferences'), JSON.stringify({
   download: { default_directory: downloads, prompt_for_download: false, directory_upgrade: true }
@@ -190,7 +190,7 @@ async function main() {
     return list.find((t) => t.id === popupTargetId) || null;
   }, 10000);
   const popup = await connectTarget(popupTarget);
-  await waitFor(async () => evalIn(popup, '!!window.__shitu', false).catch(() => false), 12000);
+  await waitFor(async () => evalIn(popup, '!!window.__antCol', false).catch(() => false), 12000);
 
   const tabs = await evalIn(popup, 'chrome.tabs.query({})');
   const fixtureTab = tabs.find((t) => (t.url || '').includes(':8765/'));
@@ -201,10 +201,10 @@ async function main() {
   await evalIn(popup, `chrome.tabs.update(${fixtureTab.id}, { active: true })`);
   await sleep(300);
   const scan = await evalIn(popup, `(async () => {
-    await window.__shitu.scan();
+    await window.__antCol.scan();
     return {
-      count: window.__shitu.state.images.length,
-      images: window.__shitu.state.images.map((i) => ({ url: i.url, kind: i.kind, w: i.width, h: i.height, visible: i.visible }))
+      count: window.__antCol.state.images.length,
+      images: window.__antCol.state.images.map((i) => ({ url: i.url, kind: i.kind, w: i.width, h: i.height, visible: i.visible }))
     };
   })()`);
   log('scan', JSON.stringify(scan, null, 2));
@@ -222,10 +222,10 @@ async function main() {
     img.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drop-host')`, false).catch(() => false), 6000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drop-host')`, false).catch(() => false), 6000);
   await sleep(250);
   const dropState = await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drop-host');
+    const host = document.getElementById('ant-col-drop-host');
     return {
       exists: !!host,
       shown: !!host?.shadowRoot?.querySelector('.card.show'),
@@ -236,17 +236,17 @@ async function main() {
   const dropShot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true });
   fs.writeFileSync(path.join(out, 'drag-page.png'), Buffer.from(dropShot.result.data, 'base64'));
   const panelOpen = await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drop-host');
+    const host = document.getElementById('ant-col-drop-host');
     const left = host?.shadowRoot?.querySelector('.left');
     const dt = new DataTransfer();
     left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
     left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => false), 4000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
   await sleep(250);
   const panelState = await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drag-panel-host');
+    const host = document.getElementById('ant-col-drag-panel-host');
     const root = host?.shadowRoot;
     return { exists: !!host, title: root?.querySelector('.title')?.value || '', dest: root?.querySelector('.collection')?.textContent || '' };
   })()`);
@@ -254,7 +254,7 @@ async function main() {
   const panelShot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true });
   fs.writeFileSync(path.join(out, 'drag-panel.png'), Buffer.from(panelShot.result.data, 'base64'));
   await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host').shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
     const title = root.querySelector('.title');
     title.value = '拖拽测试图';
     title.dispatchEvent(new Event('input', { bubbles: true }));
@@ -267,7 +267,7 @@ async function main() {
   })()`);
   await waitFor(() => walk(downloads).some((f) => f.path.includes('拖拽测试图')), 15000);
   log('drag saved files', JSON.stringify(walk(downloads).filter((f) => f.path.includes('拖拽测试图')), null, 2));
-  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => true)), 6000);
+  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 6000);
   await sleep(400);
 
   // image inside <a> -> panel offers image / link card mode
@@ -279,17 +279,17 @@ async function main() {
   })()`);
   await sleep(250);
   await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drop-host');
+    const host = document.getElementById('ant-col-drop-host');
     const left = host?.shadowRoot?.querySelector('.left');
     const dt = new DataTransfer();
     left.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
     left.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => false), 4000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
   await sleep(250);
   const linkPanel = await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host')?.shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host')?.shadowRoot;
     return {
       modesHidden: root?.querySelector('.modes')?.hidden,
       modes: [...(root?.querySelectorAll('[data-mode]') || [])].map((b) => b.textContent),
@@ -298,7 +298,7 @@ async function main() {
   })()`);
   log('link-mode panel', JSON.stringify(linkPanel));
   await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host').shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
     root.querySelector('[data-mode="link"]').click();
     const title = root.querySelector('.title');
     title.value = '拖拽链接卡片';
@@ -308,7 +308,7 @@ async function main() {
   })()`);
   await waitFor(() => walk(downloads).some((f) => f.path.includes('链接') && f.path.endsWith('.html')), 15000);
   log('drag link files', JSON.stringify(walk(downloads).filter((f) => f.path.includes('链接')), null, 2));
-  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => true)), 6000);
+  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 6000);
   await sleep(400);
 
   // drop onto a collection on the right side
@@ -320,7 +320,7 @@ async function main() {
   })()`);
   await sleep(300);
   const collectionDrop = await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drop-host');
+    const host = document.getElementById('ant-col-drop-host');
     const root = host?.shadowRoot;
     const item = [...root.querySelectorAll('.folder-item')].find((x) => x.querySelector('.name')?.textContent === '日常审美');
     if (!item) return { found: false };
@@ -329,15 +329,15 @@ async function main() {
     item.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return { found: true };
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => false), 4000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 4000);
   await sleep(250);
   const collectionPanel = await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host')?.shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host')?.shadowRoot;
     return { collection: root?.querySelector('.collection')?.textContent || '', title: root?.querySelector('.title')?.value || '' };
   })()`);
   log('collection drop', JSON.stringify({ ...collectionDrop, ...collectionPanel }));
   await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host').shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
     const title = root.querySelector('.title');
     title.value = '收藏夹测试';
     title.dispatchEvent(new Event('input', { bubbles: true }));
@@ -346,7 +346,7 @@ async function main() {
   })()`);
   await waitFor(() => walk(downloads).some((f) => f.path.includes('日常审美') && f.path.includes('收藏夹测试') && f.path.endsWith('.json')), 15000);
   log('collection files', JSON.stringify(walk(downloads).filter((f) => f.path.includes('日常审美')), null, 2));
-  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => true)), 6000);
+  await waitFor(async () => !(await evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 6000);
   await sleep(300);
 
   // "+ 建立或选择文件夹" -> new collection -> panel
@@ -359,10 +359,10 @@ async function main() {
     img.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drop-host')`, false).catch(() => false), 6000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drop-host')`, false).catch(() => false), 6000);
   await sleep(250);
   const chooserOpen = await evalIn(page, `(() => {
-    const host = document.getElementById('shitu-drop-host');
+    const host = document.getElementById('ant-col-drop-host');
     const root = host?.shadowRoot;
     const choose = root?.querySelector('.choose');
     const dt = new DataTransfer();
@@ -370,28 +370,28 @@ async function main() {
     choose.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-folder-chooser-host')`, false).catch(() => false), 4000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-folder-chooser-host')`, false).catch(() => false), 4000);
   await sleep(250);
   const chooser = await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-folder-chooser-host')?.shadowRoot;
+    const root = document.getElementById('ant-col-folder-chooser-host')?.shadowRoot;
     return { rows: [...(root?.querySelectorAll('.row .name') || [])].map((x) => x.textContent) };
   })()`);
   log('folder chooser', JSON.stringify({ chooserOpen, ...chooser }));
   await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-folder-chooser-host').shadowRoot;
+    const root = document.getElementById('ant-col-folder-chooser-host').shadowRoot;
     root.querySelector('.new').value = '临时收藏';
     root.querySelector('[data-act="ok"]').click();
     return true;
   })()`);
-  await waitFor(async () => evalIn(page, `!!document.getElementById('shitu-drag-panel-host')`, false).catch(() => false), 5000);
+  await waitFor(async () => evalIn(page, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => false), 5000);
   await sleep(250);
   const chooserPanel = await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host')?.shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host')?.shadowRoot;
     return { collection: root?.querySelector('.collection')?.textContent || '' };
   })()`);
   log('chooser panel', JSON.stringify(chooserPanel));
   await evalIn(page, `(() => {
-    const root = document.getElementById('shitu-drag-panel-host').shadowRoot;
+    const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
     root.querySelector('.x').click();
     return true;
   })()`);
@@ -506,7 +506,7 @@ async function main() {
   const dup = await evalIn(popup, `chrome.runtime.sendMessage({ type: 'save', items: ${JSON.stringify(saveItems.slice(0, 1))}, meta: {} })`);
   log('duplicate check', JSON.stringify({ saved: dup.saved, duplicate: dup.duplicate, error: dup.error }, null, 2));
   const directNames = await evalIn(popup, `(async () => {
-    const tries = ['\u62fe\u56fe\u7d20\u6750/\u94fe\u63a5/test.url', '\u62fe\u56fe\u7d20\u6750/\u94fe\u63a5/test.txt', '\u62fe\u56fe\u7d20\u6750/\u94fe\u63a5/test.html'];
+    const tries = ['Ant-col\u7d20\u6750/\u94fe\u63a5/test.url', 'Ant-col\u7d20\u6750/\u94fe\u63a5/test.txt', 'Ant-col\u7d20\u6750/\u94fe\u63a5/test.html'];
     const out = {};
     for (const f of tries) {
       try { out[f] = 'id:' + await chrome.downloads.download({ url: 'data:text/plain,hi', filename: f, saveAs: false }); }
@@ -536,10 +536,10 @@ async function main() {
   }, 10000);
   const libraryPage = await connectTarget(libTarget);
   await libraryPage.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await waitFor(async () => evalIn(libraryPage, '!!window.__shituLibrary', false).catch(() => false), 12000);
+  await waitFor(async () => evalIn(libraryPage, '!!window.__antColLibrary', false).catch(() => false), 12000);
   await sleep(1200);
   const libraryInit = await evalIn(libraryPage, `(() => {
-    const s = window.__shituLibrary.state;
+    const s = window.__antColLibrary.state;
     return {
       items: s.items.length,
       inbox: s.items.filter((i) => i.status === 'inbox').length,
@@ -567,7 +567,7 @@ async function main() {
     select.value = '帮催作品';
     select.dispatchEvent(new Event('change', { bubbles: true }));
     await new Promise((r) => setTimeout(r, 900));
-    return window.__shituLibrary.state.items.filter((i) => i.collection === '帮催作品').length;
+    return window.__antColLibrary.state.items.filter((i) => i.collection === '帮催作品').length;
   })()`);
   log('library batch', JSON.stringify({ ...batchState, projectItems: batchApplied }));
   const searchState = await evalIn(libraryPage, `(async () => {
@@ -584,10 +584,10 @@ async function main() {
   log('library search', JSON.stringify(searchState));
 
   const detailOpened = await evalIn(libraryPage, `(async () => {
-    const s = window.__shituLibrary.state;
+    const s = window.__antColLibrary.state;
     const first = s.items.find((i) => i.status === 'inbox') || s.items[0];
     if (!first) return { ok: false };
-    window.__shituLibrary.openDetail(first.id);
+    window.__antColLibrary.openDetail(first.id);
     await new Promise((r) => setTimeout(r, 250));
     return {
       ok: true,
@@ -600,22 +600,22 @@ async function main() {
   const detailShot = await libraryPage.send('Page.captureScreenshot', { format: 'png', fromSurface: true });
   fs.writeFileSync(path.join(out, 'library-detail.png'), Buffer.from(detailShot.result.data, 'base64'));
   const libUpdate = await evalIn(libraryPage, `(async () => {
-    const s = window.__shituLibrary.state;
+    const s = window.__antColLibrary.state;
     const first = s.items.find((i) => i.status === 'inbox') || s.items[0];
-    await window.__shituLibrary.updateItems([first.id], {
+    await window.__antColLibrary.updateItems([first.id], {
       status: 'kept',
       collection: '日常审美',
       annotation: 'library e2e'
     }, 'library test');
-    const updated = window.__shituLibrary.state.items.find((i) => i.id === first.id);
+    const updated = window.__antColLibrary.state.items.find((i) => i.id === first.id);
     return { status: updated?.status, collection: updated?.collection, annotation: updated?.annotation };
   })()`);
   log('library update', JSON.stringify(libUpdate));
   const folderMirror = await evalIn(libraryPage, `(async () => {
-    const s = window.__shituLibrary.state;
+    const s = window.__antColLibrary.state;
     const item = s.items.find((i) => i.mode === 'folder');
     if (!item) return { found: false };
-    await window.__shituLibrary.updateItems([item.id], { status: 'kept' }, 'mirror test');
+    await window.__antColLibrary.updateItems([item.id], { status: 'kept' }, 'mirror test');
     const root = await navigator.storage.getDirectory();
     const handle = await root.getFileHandle('_index.json');
     const list = JSON.parse(await (await handle.getFile()).text());
@@ -625,7 +625,7 @@ async function main() {
   log('folder index mirror', JSON.stringify(folderMirror));
   await evalIn(libraryPage, `document.querySelector('#toast')?.classList.remove('show'); true`).catch(() => {});
   const triageOpen = await evalIn(libraryPage, `(async () => {
-    window.__shituLibrary.startTriage();
+    window.__antColLibrary.startTriage();
     await new Promise((r) => setTimeout(r, 300));
     const card = document.querySelector('#triageRoot .triage-card');
     return { open: !!card, title: document.querySelector('#triageTitle')?.textContent || '', projects: [...document.querySelectorAll('#triageProjects button')].map((x) => x.textContent) };
@@ -643,7 +643,7 @@ async function main() {
   })()`);
   log('library triage keep', JSON.stringify(triageAction));
   await evalIn(libraryPage, `document.querySelector('#triageClose')?.click()`).catch(() => {});
-  await evalIn(libraryPage, `window.__shituLibrary.exportItems('md')`).catch(() => {});
+  await evalIn(libraryPage, `window.__antColLibrary.exportItems('md')`).catch(() => {});
   await waitFor(() => walk(downloads).some((f) => f.path.includes('Ant-col-导出')), 10000);
   log('library export', JSON.stringify(walk(downloads).filter((f) => f.path.includes('Ant-col-导出')), null, 2));
 

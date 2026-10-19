@@ -23,10 +23,10 @@ function prepareFullPage() {
       } catch { /* ignore */ }
     }
   } catch { /* ignore */ }
-  document.getElementById('shitu-toast-host')?.remove();
-  document.getElementById('shitu-capture-host')?.remove();
-  window.__shituFullPageHidden = hidden;
-  window.__shituFullPageScroll = window.scrollY || 0;
+  document.getElementById('ant-col-toast-host')?.remove();
+  document.getElementById('ant-col-capture-host')?.remove();
+  window.__antColFullPageHidden = hidden;
+  window.__antColFullPageScroll = window.scrollY || 0;
   const width = document.documentElement.clientWidth || window.innerWidth || 0;
   const height = Math.max(
     document.documentElement.scrollHeight || 0,
@@ -46,13 +46,13 @@ function scrollToY(y) {
 
 function restoreFullPage() {
   try {
-    for (const [el, visibility] of window.__shituFullPageHidden || []) {
+    for (const [el, visibility] of window.__antColFullPageHidden || []) {
       try { el.style.visibility = visibility; } catch { /* ignore */ }
     }
-    window.scrollTo(0, window.__shituFullPageScroll || 0);
+    window.scrollTo(0, window.__antColFullPageScroll || 0);
   } catch { /* ignore */ }
-  delete window.__shituFullPageHidden;
-  delete window.__shituFullPageScroll;
+  delete window.__antColFullPageHidden;
+  delete window.__antColFullPageScroll;
 }
 
 async function captureTile(tabId, windowId, format, quality) {

@@ -80,7 +80,7 @@ kind:image  is:inbox  after:2026-09-01
 
 1. 打开 `edge://extensions`（Chrome 用 `chrome://extensions`）；
 2. 开启「开发人员模式」；
-3. 点「加载解压缩的扩展」，选择本目录 `shitu-vault`；
+3. 点「加载解压缩的扩展」，选择本目录 `ant-col`；
 4. 固定工具栏图标，打开设置选择一个素材库文件夹；
 5. 点设置页或 popup 里的「打开素材库」。
 
@@ -175,7 +175,7 @@ Ant-col素材/
 
 ```json
 {
-  "schema": "shitu/v2",
+  "schema": "ant-col/v2",
   "id": "MVERBOKECCVUY",
   "kind": "image",
   "name": "art-1",
@@ -213,7 +213,7 @@ Ant-col素材/
 ## 目录
 
 ```
-shitu-vault/
+ant-col/
 ├── manifest.json
 ├── background/
 │   ├── service-worker.js    # 消息、菜单、快捷键、Library 状态与更新

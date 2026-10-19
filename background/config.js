@@ -1,5 +1,5 @@
 export const APP_NAME = 'Ant-col 蚁穴';
-export const SCHEMA = 'shitu/v2';
+export const SCHEMA = 'ant-col/v2';
 
 export const DEFAULT_SETTINGS = {
   // 'auto' = 若已选择文件夹则写文件夹，否则写下载目录；'folder' = 仅文件夹；'downloads' = 仅下载目录

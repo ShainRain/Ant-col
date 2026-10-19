@@ -1,6 +1,6 @@
-﻿from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw
 import math, os
-root = r"C:\Users\ShainRain\Documents\deepseek-harness\default-workspace\shitu-vault\test\fixture"
+root = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(root, exist_ok=True)
 
 def grad(w,h,c1,c2):
@@ -16,7 +16,7 @@ d = ImageDraw.Draw(im)
 for i in range(12):
     x=100+i*120; y=200+int(160*math.sin(i*0.8))
     d.ellipse([x,y,x+180,y+180], fill=(250,240,220), outline=(20,18,24), width=6)
-d.text((60,60),"SHITU FIXTURE 1600x1000", fill=(255,255,255))
+d.text((60,60),"ANT-COL FIXTURE 1600x1000", fill=(255,255,255))
 im.save(os.path.join(root,"art-1.jpg"), quality=88)
 
 im2 = grad(900,1200,(30,40,70),(255,140,90))

@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS } from './config.js';
 
-const DB_NAME = 'shitu-vault-db';
+const DB_NAME = 'ant-col-db';
 const DB_VERSION = 1;
 const STORE = 'kv';
 const ROOT_KEY = 'rootHandle';

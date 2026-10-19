@@ -129,10 +129,10 @@ async function chooseFolder() {
   try {
     let handle;
     try {
-      handle = await window.showDirectoryPicker({ id: 'shitu-vault', mode: 'readwrite', startIn: 'pictures' });
+      handle = await window.showDirectoryPicker({ id: 'ant-col', mode: 'readwrite', startIn: 'pictures' });
     } catch (err) {
       if (err?.name === 'AbortError') return;
-      handle = await window.showDirectoryPicker({ id: 'shitu-vault', mode: 'readwrite' });
+      handle = await window.showDirectoryPicker({ id: 'ant-col', mode: 'readwrite' });
     }
     const permission = await handle.requestPermission({ mode: 'readwrite' });
     if (permission !== 'granted') {

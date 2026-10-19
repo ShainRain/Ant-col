@@ -1,6 +1,6 @@
 # Eagle 核心实现路径 · 逆向记录（历史归档）
 
-> 本文件是早期研究记录，**不参与拾图运行，也不代表当前产品依赖 Eagle**。当前产品已独立为本地视觉收件箱，相关运行时接口与字段已移除。
+> 本文件是早期研究记录，**不参与Ant-col 蚁穴运行，也不代表当前产品依赖 Eagle**。当前产品已独立为本地视觉收件箱，相关运行时接口与字段已移除。
 
 > 目标：搞清楚 Eagle 从「网页上一张图」到「本地 library 里一条素材」的完整链路，再把其中可复用的设计抽出来，落到一个纯本地的个人 Chrome/Edge 扩展里。
 >
@@ -281,9 +281,9 @@ API 还暴露了 `/api/script/inject`（`runAPIScript`，`api-server.js:207-216`
 
 ---
 
-## 6. 从 Eagle 到拾图：设计映射
+## 6. 从 Eagle 到Ant-col 蚁穴：设计映射
 
-| Eagle 的做法 | 拾图的选择 | 原因 |
+| Eagle 的做法 | Ant-col 蚁穴的选择 | 原因 |
 | --- | --- | --- |
 | 扩展 POST 41593 | 扩展内部直接 fetch + 写盘 | 个人使用，不需要常驻本地服务 |
 | Electron 下载（带 Referer） | `fetch` + `referrer` / `useReferrer` | 保留防盗链兼容，减少依赖 |
@@ -334,14 +334,14 @@ API 还暴露了 `/api/script/inject`（`runAPIScript`，`api-server.js:207-216`
 ## 8. 未解决 / 边界
 
 - **主进程 `.jsc` 未反编译**：`run.jsc` 是 V8 bytecode，本次只做了字符串与日志级证据；41593 的精确请求体解析、错误码、CORS 细节没有逐行确认。表单字段来自扩展侧与渲染器侧代码，已足够支撑复刻。
-- **41593 的响应格式**没有在运行时抓包；扩展侧只关心成功/失败，拾图不需要兼容它。
-- **Eagle API 的 CORS/鉴权**没有实际启动 Eagle 验证。`run.jsc` 字符串包含 `Access-Control-Allow-Origin`，且扩展从 `chrome-extension://` 直接请求 41595，说明服务端允许扩展来源；拾图的 Eagle 联动按同一假设实现，并在设置页提供「测试连接」。
-- **collect window 的完整交互**（标签建议、文件夹密码、最近文件夹）只读了 UI 与控制器，未做运行时回归；拾图不复刻该 iframe，改用 popup。
-- **Eagle 的缩略图算法/色板算法**未逆向；拾图当前不生成缩略图/色板。
+- **41593 的响应格式**没有在运行时抓包；扩展侧只关心成功/失败，Ant-col 蚁穴不需要兼容它。
+- **Eagle API 的 CORS/鉴权**没有实际启动 Eagle 验证。`run.jsc` 字符串包含 `Access-Control-Allow-Origin`，且扩展从 `chrome-extension://` 直接请求 41595，说明服务端允许扩展来源；Ant-col 蚁穴的 Eagle 联动按同一假设实现，并在设置页提供「测试连接」。
+- **collect window 的完整交互**（标签建议、文件夹密码、最近文件夹）只读了 UI 与控制器，未做运行时回归；Ant-col 蚁穴不复刻该 iframe，改用 popup。
+- **Eagle 的缩略图算法/色板算法**未逆向；Ant-col 蚁穴当前不生成缩略图/色板。
 - 本报告没有修改 Eagle 安装目录、库文件或注册表。
 
 ---
 
 ## 9. 一句话总结
 
-Eagle 把「浏览器里的视觉上下文」通过一个本地端口交给 Electron，再由 Electron 下载、生成缩略图、写进按 ID 分目录的 library；拾图把这套管线压缩成「扩展内 fetch → File System Access 写盘 → 同名 JSON + 索引」，保留上下文与 Eagle 兼容字段，但不再需要常驻客户端。
+Eagle 把「浏览器里的视觉上下文」通过一个本地端口交给 Electron，再由 Electron 下载、生成缩略图、写进按 ID 分目录的 library；Ant-col 蚁穴把这套管线压缩成「扩展内 fetch → File System Access 写盘 → 同名 JSON + 索引」，保留上下文与 Eagle 兼容字段，但不再需要常驻客户端。

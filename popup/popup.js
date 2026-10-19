@@ -518,6 +518,6 @@ function bind() {
   }
   await scan();
   if (new URLSearchParams(location.search).has('test')) {
-    window.__shitu = { scan, state, saveSelected, loadState, toast };
+    window.__antCol = { scan, state, saveSelected, loadState, toast };
   }
 })();

@@ -16,7 +16,7 @@ import { getWritableRoot, readIndexMirror, writeIndexMirror, writeText } from '.
 import { clearThumbs } from './thumb-store.js';
 import { showDefaultFolder, showDownload } from './downloads-writer.js';
 
-const MENU_ROOT = 'shitu-root';
+const MENU_ROOT = 'ant-col-root';
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   await ensureDefaults();

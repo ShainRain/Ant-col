@@ -1,6 +1,6 @@
 (() => {
-  if (window.__shituVaultLoaded) return;
-  window.__shituVaultLoaded = true;
+  if (window.__antColVaultLoaded) return;
+  window.__antColVaultLoaded = true;
 
   let lastPoint = { x: 0, y: 0 };
   let lastElement = null;
@@ -160,7 +160,7 @@
   function ensureToastHost() {
     if (toastHost && document.documentElement.contains(toastHost)) return toastHost;
     toastHost = document.createElement('div');
-    toastHost.id = 'shitu-toast-host';
+    toastHost.id = 'ant-col-toast-host';
     toastHost.style.cssText = 'position:fixed;z-index:2147483647;right:22px;bottom:22px;pointer-events:none;';
     const shadow = toastHost.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
@@ -208,7 +208,7 @@
     captureActive = true;
 
     const host = document.createElement('div');
-    host.id = 'shitu-capture-host';
+    host.id = 'ant-col-capture-host';
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;cursor:crosshair;pointer-events:none;';
     const shadow = host.attachShadow({ mode: 'open' });
     shadow.innerHTML = `

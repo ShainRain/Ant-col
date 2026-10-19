@@ -1,6 +1,6 @@
 (() => {
-  if (window.__shituDragLoaded) return;
-  window.__shituDragLoaded = true;
+  if (window.__antColDragLoaded) return;
+  window.__antColDragLoaded = true;
 
   let dragged = null;
   let dragActive = false;
@@ -120,12 +120,12 @@
 
   function onDragStart(event) {
     if (!event.dataTransfer) return;
-    if (event.target?.closest?.('#shitu-drop-host,#shitu-drag-panel-host,#shitu-folder-chooser-host')) return;
+    if (event.target?.closest?.('#ant-col-drop-host,#ant-col-drag-panel-host,#ant-col-folder-chooser-host')) return;
     const item = describe(event.target);
     if (!item) return;
     dragged = item;
     dragActive = true;
-    try { event.dataTransfer.setData('application/x-shitu-item', JSON.stringify(item)); } catch { /* ignore */ }
+    try { event.dataTransfer.setData('application/x-ant-col-item', JSON.stringify(item)); } catch { /* ignore */ }
     try { event.dataTransfer.effectAllowed = 'copyMove'; } catch { /* ignore */ }
     loadQuick();
     setTimeout(() => {
@@ -151,7 +151,7 @@
   function ensureDropPage() {
     if (dropHost?.isConnected) return;
     dropHost = document.createElement('div');
-    dropHost.id = 'shitu-drop-host';
+    dropHost.id = 'ant-col-drop-host';
     dropHost.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:none;';
     dropShadow = dropHost.attachShadow({ mode: 'open' });
     dropShadow.innerHTML = `
@@ -381,7 +381,7 @@
     if (!collections.includes(selected)) selected = collections[0] || DEFAULT_COLLECTION;
 
     chooserHost = document.createElement('div');
-    chooserHost.id = 'shitu-folder-chooser-host';
+    chooserHost.id = 'ant-col-folder-chooser-host';
     chooserHost.style.cssText = 'position:fixed;inset:0;z-index:2147483647;';
     const shadow = chooserHost.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
@@ -543,7 +543,7 @@
     };
 
     panelHost = document.createElement('div');
-    panelHost.id = 'shitu-drag-panel-host';
+    panelHost.id = 'ant-col-drag-panel-host';
     panelHost.style.cssText = 'position:fixed;inset:0;z-index:2147483647;';
     panelShadow = panelHost.attachShadow({ mode: 'open' });
     panelShadow.innerHTML = `

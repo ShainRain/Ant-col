@@ -1,4 +1,4 @@
-const DB_NAME = 'shitu-thumbs';
+const DB_NAME = 'ant-col-thumbs';
 const DB_VERSION = 1;
 const STORE = 'thumbs';
 
