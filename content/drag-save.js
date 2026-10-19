@@ -39,30 +39,90 @@
   };
   const isEditable = (el) => !!el?.closest?.('[contenteditable="true"],[contenteditable=""],[contenteditable="plaintext-only"]');
 
+  // 后台是扩展源，读不到页面里的 blob: 地址；在页面内先转成 data URL 再交给后台下载
+  async function blobToDataUrl(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return '';
+      const blob = await res.blob();
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(blob);
+      });
+    } catch { return ''; }
+  }
+
+  const isHttpLink = (href) => !!href && /^(https?:|file:)/i.test(href);
+
+  function imageItem(img, anchor) {
+    const src = img?.currentSrc || img?.src;
+    if (!src) return null;
+    const link = isHttpLink(anchor?.href) ? abs(anchor.href) : '';
+    return {
+      kind: 'image',
+      url: abs(src),
+      previewUrl: abs(src),
+      title: img.alt || img.title || (anchor?.textContent || '').trim() || '',
+      alt: img.alt || '',
+      width: img.naturalWidth || 0,
+      height: img.naturalHeight || 0,
+      linkUrl: link,
+      anchorTitle: (anchor?.textContent || '').trim(),
+      pageUrl: location.href,
+      pageTitle: document.title
+    };
+  }
+
+  function backgroundUrlOf(node) {
+    try {
+      const bg = getComputedStyle(node).backgroundImage || '';
+      const m = /url\((['"]?)([^'")]+)\1\)/i.exec(bg);
+      const url = (m && m[2] ? m[2] : '').trim();
+      if (!url || /^(none|data:,|about:blank)$/i.test(url)) return '';
+      return abs(url);
+    } catch { return ''; }
+  }
+
+  function backgroundImageOf(el) {
+    const own = backgroundUrlOf(el);
+    if (own) return own;
+    // 自身没有背景图时，只在「无文本、且祖先很近」的情况下向上推断，
+    // 避免把整页/栏目的装饰背景当成素材。
+    if ((el.textContent || '').trim()) return '';
+    let node = el.parentElement;
+    for (let depth = 0; node && node.nodeType === 1 && depth < 3; depth++) {
+      const url = backgroundUrlOf(node);
+      if (url) return url;
+      node = node.parentElement;
+    }
+    return '';
+  }
+
+  function backgroundItem(url, el, anchor) {
+    if (!url) return null;
+    return {
+      kind: 'image',
+      url,
+      previewUrl: url,
+      title: el?.title || (anchor?.textContent || '').trim() || '',
+      alt: '',
+      width: 0,
+      height: 0,
+      linkUrl: isHttpLink(anchor?.href) ? abs(anchor.href) : '',
+      anchorTitle: (anchor?.textContent || '').trim(),
+      pageUrl: location.href,
+      pageTitle: document.title
+    };
+  }
+
   function describe(target) {
     const el = target?.nodeType === 1 ? target : target?.parentElement;
     if (!el || isEditable(el)) return null;
 
     const img = el.closest('img');
-    if (img) {
-      const src = img.currentSrc || img.src;
-      if (!src) return null;
-      const anchor = img.closest('a');
-      const link = anchor?.href && /^(https?:|file:)/i.test(anchor.href) ? abs(anchor.href) : '';
-      return {
-        kind: 'image',
-        url: abs(src),
-        previewUrl: abs(src),
-        title: img.alt || img.title || '',
-        alt: img.alt || '',
-        width: img.naturalWidth || 0,
-        height: img.naturalHeight || 0,
-        linkUrl: link,
-        anchorTitle: (anchor?.textContent || '').trim(),
-        pageUrl: location.href,
-        pageTitle: document.title
-      };
-    }
+    if (img) return imageItem(img, img.closest('a'));
 
     const video = el.closest('video');
     if (video) {
@@ -84,22 +144,36 @@
       };
     }
 
-    const a = el.closest('a');
-    if (a?.href && /^(https?:|file:)/i.test(a.href)) {
-      const inner = a.querySelector('img');
+    const anchor = el.closest('a');
+    if (isHttpLink(anchor?.href)) {
+      // 图片常常被 <a> 包裹，或站点给 <img> 加了 draggable="false"，
+      // 此时拖拽的真实起点是链接本身。优先识别链接里的图片 / 链接的背景图，
+      // 生成「图片」项并保留 linkUrl，面板里仍可切换为链接卡片。
+      const innerImg = anchor.querySelector('img');
+      if (innerImg) return imageItem(innerImg, anchor);
+      const anchorBg = backgroundUrlOf(anchor);
+      if (anchorBg) return backgroundItem(anchorBg, anchor, anchor);
       return {
         kind: 'link',
-        url: abs(a.href),
-        linkUrl: abs(a.href),
-        previewUrl: inner ? abs(inner.currentSrc || inner.src) : '',
-        title: (a.textContent || '').trim() || a.title || '',
+        url: abs(anchor.href),
+        linkUrl: abs(anchor.href),
+        previewUrl: '',
+        title: (anchor.textContent || '').trim() || anchor.title || '',
         alt: '',
-        width: inner?.naturalWidth || 0,
-        height: inner?.naturalHeight || 0,
+        width: 0,
+        height: 0,
         pageUrl: location.href,
         pageTitle: document.title
       };
     }
+
+    // 卡片类站点的拖拽起点常是容器：容器内只有一张图就当图片处理
+    const innerImgs = el.querySelectorAll ? el.querySelectorAll('img') : [];
+    if (innerImgs.length === 1) return imageItem(innerImgs[0], innerImgs[0].closest('a'));
+
+    // 图片画在 CSS 背景上的站点
+    const bg = backgroundImageOf(el);
+    if (bg) return backgroundItem(bg, el, el.closest('a'));
 
     return null;
   }
@@ -799,9 +873,19 @@
       const item = state.item;
       const mode = state.mode;
       const finalTitle = (title.value || '').trim() || item.title || item.alt || item.pageTitle || '未命名素材';
+      state.busy = true;
+      saveBtn.disabled = true;
+      saveBtn.textContent = '保存中…';
+      setStatus('正在下载并写入素材库…');
+      let saveUrl = mode === 'link' ? item.linkUrl : item.url;
+      if (mode !== 'link' && /^blob:/i.test(String(saveUrl || ''))) {
+        setStatus('正在从页面读取图片…');
+        const inline = await blobToDataUrl(saveUrl);
+        if (inline) saveUrl = inline;
+      }
       const payload = {
         kind: mode === 'link' ? 'link' : item.kind,
-        url: mode === 'link' ? item.linkUrl : item.url,
+        url: saveUrl,
         linkUrl: item.linkUrl || '',
         title: finalTitle,
         alt: item.alt || '',
@@ -810,10 +894,6 @@
         pageUrl: item.pageUrl || location.href,
         pageTitle: item.pageTitle || document.title
       };
-      state.busy = true;
-      saveBtn.disabled = true;
-      saveBtn.textContent = '保存中…';
-      setStatus('正在下载并写入素材库…');
       try {
         const response = await chrome.runtime.sendMessage({
           type: 'save',

@@ -663,6 +663,84 @@ async function main() {
   const picker = await evalIn(optionsPage, 'typeof window.showDirectoryPicker');
   log('options screenshot', optPath, 'picker:', picker);
 
+  // regression: 拖拽起点不是 <img> 本身（图片被 <a> 包裹 / CSS 背景图）时也必须存成图片
+  const baselineTargetIds = new Set((await fetchJson(`http://127.0.0.1:${CDP_PORT}/json/list`)).map((t) => t.id));
+  await browser.send('Target.createTarget', { url: `http://127.0.0.1:${PORT}/index.html` });
+  const regTargetInfo = await waitFor(async () => {
+    const list = await fetchJson(`http://127.0.0.1:${CDP_PORT}/json/list`);
+    return list.find((t) => t.type === 'page' && !baselineTargetIds.has(t.id) && t.url.includes('index.html')) || null;
+  }, 15000);
+  if (!regTargetInfo) throw new Error('regression page target not found');
+  const regPage = await connectTarget(regTargetInfo);
+  await sleep(1500);
+
+  async function dragSaveCase(selector, { expectExt, expectMode, expectModesHidden, collection = '' }) {
+    await evalIn(regPage, `(() => {
+      document.getElementById('ant-col-drag-panel-host')?.remove();
+      const host = document.getElementById('ant-col-drop-host');
+      if (host) host.style.display = 'none';
+      const el = document.querySelector(${JSON.stringify(selector)});
+      if (!el) throw new Error('missing drag source');
+      const dt = new DataTransfer();
+      el.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
+      return true;
+    })()`);
+    const dock = await waitFor(async () => evalIn(regPage, `(() => {
+      const host = document.getElementById('ant-col-drop-host');
+      return !!(host && host.style.display === 'block' && host.shadowRoot?.querySelector('.card.show'));
+    })()`), 6000);
+    if (!dock) throw new Error(`drag dock did not open for ${selector}`);
+    await evalIn(regPage, `(() => {
+      const host = document.getElementById('ant-col-drop-host');
+      const root = host.shadowRoot;
+      const target = ${JSON.stringify(collection)}
+        ? [...root.querySelectorAll('.folder-item')].find((x) => x.querySelector('.name')?.textContent === ${JSON.stringify(collection)})
+        : root.querySelector('.left');
+      if (!target) throw new Error('drop target not found');
+      const dt = new DataTransfer();
+      target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
+      target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+      return true;
+    })()`);
+    const opened = await waitFor(async () => evalIn(regPage, `!!document.getElementById('ant-col-drag-panel-host')`), 5000);
+    if (!opened) throw new Error(`panel did not open for ${selector}`);
+    await sleep(300);
+    const panel = await evalIn(regPage, `(() => {
+      const root = document.getElementById('ant-col-drag-panel-host').shadowRoot;
+      return {
+        modesHidden: !!root.querySelector('.modes')?.hidden,
+        activeMode: root.querySelector('[data-mode].on')?.dataset.mode || null,
+        title: root.querySelector('.title')?.value || ''
+      };
+    })()`);
+    if (panel.activeMode !== expectMode) throw new Error(`${selector}: active mode ${panel.activeMode}, expected ${expectMode}`);
+    if (panel.modesHidden !== expectModesHidden) throw new Error(`${selector}: modes hidden=${panel.modesHidden}, expected ${expectModesHidden}`);
+
+    const before = new Set(walk(downloads).map((f) => f.path));
+    await evalIn(regPage, `(() => { document.getElementById('ant-col-drag-panel-host').shadowRoot.querySelector('.save').click(); })()`);
+    const closed = await waitFor(async () => !(await evalIn(regPage, `!!document.getElementById('ant-col-drag-panel-host')`, false).catch(() => true)), 20000);
+    if (!closed) throw new Error(`${selector}: panel did not close (save failed)`);
+    await sleep(600);
+    const added = walk(downloads).filter((f) => !before.has(f.path) && !f.path.endsWith('.tmp') && !f.path.endsWith('.crdownload'));
+    const main = added.find((f) => !f.path.endsWith('.json'));
+    if (!main) throw new Error(`${selector}: nothing saved (files: ${JSON.stringify(added.map((f) => f.path))})`);
+    if (expectExt && !main.path.endsWith(expectExt)) throw new Error(`${selector}: saved ${main.path}, expected ${expectExt}`);
+    if (expectExt !== '.html' && added.some((f) => f.path.endsWith('.html'))) {
+      throw new Error(`${selector}: unexpectedly saved a link card: ${JSON.stringify(added.map((f) => f.path))}`);
+    }
+    log('drag regression', JSON.stringify({ selector, ...panel, saved: added.map((f) => f.path) }));
+    return added;
+  }
+
+  await dragSaveCase('.bg', { expectExt: '.png', expectMode: 'image', expectModesHidden: true });
+  await dragSaveCase('main figure:nth-of-type(2) a', {
+    expectExt: '.png',
+    expectMode: 'image',
+    expectModesHidden: false,
+    collection: '日常审美'
+  });
+  regPage.close();
+
   const swErrors = sw.events.filter((e) => e.method === 'Runtime.exceptionThrown' || e.method === 'Log.entryAdded');
   log('sw errors', JSON.stringify(swErrors.slice(-10), null, 2));
 
