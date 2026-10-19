@@ -84,6 +84,8 @@ kind:image  is:inbox  after:2026-09-01
 4. 固定工具栏图标，打开设置选择一个素材库文件夹；
 5. 点设置页或 popup 里的「打开素材库」。
 
+不想克隆仓库时，可以直接从 [Releases](https://github.com/ShainRain/Ant-col/releases) 下载最新的 `ant-col-<版本>.zip`，解压后在第 3 步选择解压出的目录。
+
 不选文件夹也能用，默认保存到：
 
 ```
